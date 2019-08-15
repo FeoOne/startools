@@ -14,6 +14,8 @@
 		BDC3A30223040E19002E249A /* Callback.m in Sources */ = {isa = PBXBuildFile; fileRef = BDC3A30023040E19002E249A /* Callback.m */; };
 		BDC3A305230455CE002E249A /* MessageCenter.h in Headers */ = {isa = PBXBuildFile; fileRef = BDC3A303230455CE002E249A /* MessageCenter.h */; };
 		BDC3A306230455CE002E249A /* MessageCenter.m in Sources */ = {isa = PBXBuildFile; fileRef = BDC3A304230455CE002E249A /* MessageCenter.m */; };
+		BDC3A30923052D23002E249A /* Core.h in Headers */ = {isa = PBXBuildFile; fileRef = BDC3A30723052D23002E249A /* Core.h */; };
+		BDC3A30A23052D23002E249A /* Core.m in Sources */ = {isa = PBXBuildFile; fileRef = BDC3A30823052D23002E249A /* Core.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +28,8 @@
 		BDC3A30023040E19002E249A /* Callback.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Callback.m; sourceTree = "<group>"; };
 		BDC3A303230455CE002E249A /* MessageCenter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MessageCenter.h; sourceTree = "<group>"; };
 		BDC3A304230455CE002E249A /* MessageCenter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MessageCenter.m; sourceTree = "<group>"; };
+		BDC3A30723052D23002E249A /* Core.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Core.h; sourceTree = "<group>"; };
+		BDC3A30823052D23002E249A /* Core.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Core.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,6 +72,8 @@
 		BD222B5D23027B590099F193 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				BDC3A30723052D23002E249A /* Core.h */,
+				BDC3A30823052D23002E249A /* Core.m */,
 				BD222B5E23027B720099F193 /* MessageHandler.h */,
 				BD222B5F23027B720099F193 /* MessageHandler.m */,
 				BDC3A2FF23040E19002E249A /* Callback.h */,
@@ -85,6 +91,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BDC3A30923052D23002E249A /* Core.h in Headers */,
 				BD222B5723027B3F0099F193 /* StarTools.h in Headers */,
 				BD222B6023027B720099F193 /* MessageHandler.h in Headers */,
 				BDC3A30123040E19002E249A /* Callback.h in Headers */,
@@ -161,6 +168,7 @@
 			files = (
 				BDC3A30223040E19002E249A /* Callback.m in Sources */,
 				BDC3A306230455CE002E249A /* MessageCenter.m in Sources */,
+				BDC3A30A23052D23002E249A /* Core.m in Sources */,
 				BD222B6123027B720099F193 /* MessageHandler.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
