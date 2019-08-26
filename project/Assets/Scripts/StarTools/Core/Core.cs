@@ -1,13 +1,9 @@
 ﻿using UnityEngine;
 
-namespace StarTools
+namespace StarTools.Core
 {
-	using Platform;
-	
-	public static class MessageCenter
+	public static class Core
 	{
-		
-
 		[RuntimeInitializeOnLoadMethod]
 		private static void Setup()
 		{
@@ -21,7 +17,7 @@ namespace StarTools
 
 		private static void OnMessage(string message, string data)
 		{
-			
+			// todo: process message from native code
 		}
 	}
 }

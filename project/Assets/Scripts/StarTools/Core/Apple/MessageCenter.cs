@@ -1,18 +1,18 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace StarTools.Platform.Apple
+namespace StarTools.Core.Apple
 {
     public static class MessageCenter
     {
         private delegate void MessageDelegate(string message, string data);
         
-        private static Action<string, string> _onMessage;
+        private static Action<string, string> _onMessageManagedAction;
 
         [AOT.MonoPInvokeCallback(typeof(MessageDelegate))]
         private static void OnMessage(string message, string data)
         {
-            _onMessage.Invoke(message, data);
+            _onMessageManagedAction?.Invoke(message, data);
         }
 
         [DllImport("__Internal")]
@@ -20,7 +20,7 @@ namespace StarTools.Platform.Apple
         
         public static void Setup(Action<string, string> onMessage)
         {
-            _onMessage = onMessage;
+            _onMessageManagedAction = onMessage;
             
             RegisterMessageCenterDelegate(OnMessage);
         }

@@ -6,8 +6,7 @@
 //  Copyright © 2019 FeoSoftware. All rights reserved.
 //
 
-#import <StarTools/MessageHandler.h>
-#import <StarTools/Callback.h>
+#import <StarTools/Facade.h>
 
 //! Project version number for StarTools.
 // FOUNDATION_EXPORT double StarToolsVersionNumber;

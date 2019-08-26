@@ -2,14 +2,14 @@ using System;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
-namespace StarTools.Apple
+namespace StarTools.Core.Apple
 {
-    public class Callback
+    public class Feedback
     {
         private delegate void CallbackDelegate(IntPtr ptr, string data);
 
         [DllImport("__Internal")]
-        private static extern void RegisterCallbackDelegate(CallbackDelegate callbackDelegate);
+        private static extern void RegisterFeedbackDelegate(CallbackDelegate callbackDelegate);
 
         [AOT.MonoPInvokeCallback(typeof(CallbackDelegate))]
         private static void CallbackInvoke(IntPtr ptr, string data)
@@ -89,10 +89,26 @@ namespace StarTools.Apple
             return Newtonsoft.Json.JsonConvert.DeserializeObject(value, type);
         }
 
+        public static IntPtr ObjectToIntPtr(object obj)
+        {
+            if (obj == null)
+            {
+                return IntPtr.Zero;
+            }
+
+            var handle = GCHandle.Alloc(obj);
+            return GCHandle.ToIntPtr(handle);
+        }
+
+        public static IntPtr ActionToIntPtr<T>(Action<T> action)
+        {
+            return ObjectToIntPtr(action);
+        }
+
         [RuntimeInitializeOnLoadMethod]
         private static void Setup()
         {
-            RegisterCallbackDelegate(CallbackInvoke);
+            RegisterFeedbackDelegate(CallbackInvoke);
         }
     }
 }

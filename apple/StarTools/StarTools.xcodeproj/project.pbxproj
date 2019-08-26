@@ -8,12 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		BD222B5723027B3F0099F193 /* StarTools.h in Headers */ = {isa = PBXBuildFile; fileRef = BD222B5523027B3F0099F193 /* StarTools.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		BD222B6023027B720099F193 /* MessageHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = BD222B5E23027B720099F193 /* MessageHandler.h */; };
-		BD222B6123027B720099F193 /* MessageHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = BD222B5F23027B720099F193 /* MessageHandler.m */; };
-		BDC3A30123040E19002E249A /* Callback.h in Headers */ = {isa = PBXBuildFile; fileRef = BDC3A2FF23040E19002E249A /* Callback.h */; };
-		BDC3A30223040E19002E249A /* Callback.m in Sources */ = {isa = PBXBuildFile; fileRef = BDC3A30023040E19002E249A /* Callback.m */; };
-		BDC3A305230455CE002E249A /* MessageCenter.h in Headers */ = {isa = PBXBuildFile; fileRef = BDC3A303230455CE002E249A /* MessageCenter.h */; };
-		BDC3A306230455CE002E249A /* MessageCenter.m in Sources */ = {isa = PBXBuildFile; fileRef = BDC3A304230455CE002E249A /* MessageCenter.m */; };
+		BDB16CA92313CD3F00931E04 /* Billing.h in Headers */ = {isa = PBXBuildFile; fileRef = BDB16CA72313CD3F00931E04 /* Billing.h */; };
+		BDB16CAA2313CD3F00931E04 /* Billing.m in Sources */ = {isa = PBXBuildFile; fileRef = BDB16CA82313CD3F00931E04 /* Billing.m */; };
+		BDB16CAE2313F4BB00931E04 /* Facade.m in Sources */ = {isa = PBXBuildFile; fileRef = BDB16CAD2313F4BB00931E04 /* Facade.m */; };
+		BDB16CBD23141BC200931E04 /* Feedback.h in Headers */ = {isa = PBXBuildFile; fileRef = BDB16CBB23141BC200931E04 /* Feedback.h */; };
+		BDB16CBE23141BC200931E04 /* Feedback.m in Sources */ = {isa = PBXBuildFile; fileRef = BDB16CBC23141BC200931E04 /* Feedback.m */; };
 		BDC3A30923052D23002E249A /* Core.h in Headers */ = {isa = PBXBuildFile; fileRef = BDC3A30723052D23002E249A /* Core.h */; };
 		BDC3A30A23052D23002E249A /* Core.m in Sources */ = {isa = PBXBuildFile; fileRef = BDC3A30823052D23002E249A /* Core.m */; };
 /* End PBXBuildFile section */
@@ -22,12 +21,13 @@
 		BD222B5223027B3F0099F193 /* StarTools.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = StarTools.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BD222B5523027B3F0099F193 /* StarTools.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StarTools.h; sourceTree = "<group>"; };
 		BD222B5623027B3F0099F193 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		BD222B5E23027B720099F193 /* MessageHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MessageHandler.h; sourceTree = "<group>"; };
-		BD222B5F23027B720099F193 /* MessageHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MessageHandler.m; sourceTree = "<group>"; };
-		BDC3A2FF23040E19002E249A /* Callback.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Callback.h; sourceTree = "<group>"; };
-		BDC3A30023040E19002E249A /* Callback.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Callback.m; sourceTree = "<group>"; };
-		BDC3A303230455CE002E249A /* MessageCenter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MessageCenter.h; sourceTree = "<group>"; };
-		BDC3A304230455CE002E249A /* MessageCenter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MessageCenter.m; sourceTree = "<group>"; };
+		BDB16CA72313CD3F00931E04 /* Billing.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Billing.h; sourceTree = "<group>"; };
+		BDB16CA82313CD3F00931E04 /* Billing.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Billing.m; sourceTree = "<group>"; };
+		BDB16CAB2313E2C400931E04 /* Prefix.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Prefix.h; sourceTree = "<group>"; };
+		BDB16CAC2313F44700931E04 /* Facade.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Facade.h; sourceTree = "<group>"; };
+		BDB16CAD2313F4BB00931E04 /* Facade.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Facade.m; sourceTree = "<group>"; };
+		BDB16CBB23141BC200931E04 /* Feedback.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Feedback.h; sourceTree = "<group>"; };
+		BDB16CBC23141BC200931E04 /* Feedback.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Feedback.m; sourceTree = "<group>"; };
 		BDC3A30723052D23002E249A /* Core.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Core.h; sourceTree = "<group>"; };
 		BDC3A30823052D23002E249A /* Core.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Core.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -72,16 +72,33 @@
 		BD222B5D23027B590099F193 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				BDC3A30723052D23002E249A /* Core.h */,
-				BDC3A30823052D23002E249A /* Core.m */,
-				BD222B5E23027B720099F193 /* MessageHandler.h */,
-				BD222B5F23027B720099F193 /* MessageHandler.m */,
-				BDC3A2FF23040E19002E249A /* Callback.h */,
-				BDC3A30023040E19002E249A /* Callback.m */,
-				BDC3A303230455CE002E249A /* MessageCenter.h */,
-				BDC3A304230455CE002E249A /* MessageCenter.m */,
+				BDB16CAC2313F44700931E04 /* Facade.h */,
+				BDB16CAD2313F4BB00931E04 /* Facade.m */,
+				BDB16CA52313CC0300931E04 /* core */,
+				BDB16CA62313CC1D00931E04 /* billing */,
 			);
 			path = src;
+			sourceTree = "<group>";
+		};
+		BDB16CA52313CC0300931E04 /* core */ = {
+			isa = PBXGroup;
+			children = (
+				BDB16CAB2313E2C400931E04 /* Prefix.h */,
+				BDC3A30723052D23002E249A /* Core.h */,
+				BDC3A30823052D23002E249A /* Core.m */,
+				BDB16CBB23141BC200931E04 /* Feedback.h */,
+				BDB16CBC23141BC200931E04 /* Feedback.m */,
+			);
+			path = core;
+			sourceTree = "<group>";
+		};
+		BDB16CA62313CC1D00931E04 /* billing */ = {
+			isa = PBXGroup;
+			children = (
+				BDB16CA72313CD3F00931E04 /* Billing.h */,
+				BDB16CA82313CD3F00931E04 /* Billing.m */,
+			);
+			path = billing;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -92,10 +109,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				BDC3A30923052D23002E249A /* Core.h in Headers */,
+				BDB16CBD23141BC200931E04 /* Feedback.h in Headers */,
+				BDB16CA92313CD3F00931E04 /* Billing.h in Headers */,
 				BD222B5723027B3F0099F193 /* StarTools.h in Headers */,
-				BD222B6023027B720099F193 /* MessageHandler.h in Headers */,
-				BDC3A30123040E19002E249A /* Callback.h in Headers */,
-				BDC3A305230455CE002E249A /* MessageCenter.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -166,10 +182,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BDC3A30223040E19002E249A /* Callback.m in Sources */,
-				BDC3A306230455CE002E249A /* MessageCenter.m in Sources */,
 				BDC3A30A23052D23002E249A /* Core.m in Sources */,
-				BD222B6123027B720099F193 /* MessageHandler.m in Sources */,
+				BDB16CAE2313F4BB00931E04 /* Facade.m in Sources */,
+				BDB16CBE23141BC200931E04 /* Feedback.m in Sources */,
+				BDB16CAA2313CD3F00931E04 /* Billing.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
