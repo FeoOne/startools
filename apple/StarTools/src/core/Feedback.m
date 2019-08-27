@@ -16,7 +16,12 @@
 
 @implementation Feedback
 
--(instancetype)initWithUnityAction:(ManagedAction)action
++(instancetype)newWithManagedAction:(ManagedAction)action;
+{
+	return [[Feedback alloc] initWithManagedAction:action];
+}
+
+-(instancetype)initWithManagedAction:(ManagedAction)action
 {
 	if ((self = [super init])) {
 		_action = action;
@@ -26,6 +31,11 @@
 
 -(void)respond:(NSDictionary *)params
 {
+	if (_action == NULL) {
+		logmsg(@"[Feedback] Can't respond with NULL action.");
+		return;
+	}
+	
 	__block NSString *json = nil;
 	
 	if (params != nil) {
@@ -42,7 +52,7 @@
 	dispatch_async(dispatch_get_main_queue(), ^{
 		DEF_STRONG_SELF;
 		if ([Feedback getFeedbackDelegate] != NULL) {
-			[Feedback getFeedbackDelegate]([strongSelf action], (json != nil) ? [json cStringUsingEncoding:NSUTF8StringEncoding] : NULL);
+			[Feedback getFeedbackDelegate](strongSelf.action, (json != nil) ? [json cStringUsingEncoding:NSUTF8StringEncoding] : NULL);
 		}
 	});
 }

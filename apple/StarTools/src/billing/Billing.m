@@ -10,15 +10,37 @@
 
 #import "Billing.h"
 
-#define logmsg_(format, ...)	logmsg("[Billing] " format, ##__VA_ARGS__)
+/*	Launch feedback keys
+ */
+static const NSString * const kSuccessFeedbackKey = @"success";
+static const NSString * const kFailFeedbackKey = @"fail";
+
+/*	Launch json keys
+ */
+// success
+static const NSString * const kProductsKey = @"Products";
+// fail
+static const NSString * const kMessageKey = @"Message";
+
+/*	Product json keys
+ */
+static const NSString * const kProductIdentifierKey = @"Identifier";
+static const NSString * const kProductLocalizedDescriptionKey = @"LocalizedDescription";
+static const NSString * const kProductLocalizedTitleKey = @"LocalizedTitle";
+static const NSString * const kProductLocalizedPriceKey = @"LocalizedPrice";
+static const NSString * const kProductPriceKey = @"Price";
 
 @interface Billing () <SKProductsRequestDelegate, SKPaymentTransactionObserver>
 {
 }
 
 @property(strong, nonatomic) NSMutableSet<NSString *> *identifiers;
-@property(strong, nonatomic) NSMutableDictionary<NSString *, SKProduct *> *products;
-@property(strong, nonatomic) NSMapTable<SKRequest *, Feedback *> *startRequests;
+@property(strong, nonatomic) NSDictionary<NSString *, SKProduct *> *products;
+
+@property(strong, nonatomic) NSMapTable<SKRequest *, NSDictionary *> *startFeedbacks;
+
++(NSDictionary *)buildLaunchSuccessResponse:(NSDictionary<NSString *, SKProduct *> *)products;
++(NSDictionary *)buildLaunchFailResponse:(NSError *)error;
 
 @end
 
@@ -30,7 +52,7 @@
 {
 	if ((self = [super init])) {
 		_identifiers = [NSMutableSet new];
-		_startRequests = [NSMapTable new];
+		_startFeedbacks = [NSMapTable new];
 		
 		[SKPAYMENTQUEUE addTransactionObserver:self];
 	}
@@ -43,18 +65,19 @@
 {
 	[_identifiers addObject:identifier];
 	
-	logmsg_("Added identifier '%@'.", identifier);
+	logmsg("[Billing] Added product identifier '%@'.", identifier);
 }
 
--(void)startWithFeedback:(Feedback *)feedback
+-(void)launchWithSuccessFeedback:(Feedback *)successFeedback andFailFeedback:(Feedback *)failFeedback
 {
-	logmsg("Starting billing...");
-	
 	DEF_WEAK_SELF;
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 		DEF_STRONG_SELF;
+		
+		logmsg("[Billing] Launch initiated...");
+		
 		SKProductsRequest *request = [[SKProductsRequest alloc] initWithProductIdentifiers:strongSelf.identifiers];
-		[strongSelf.startRequests setObject:feedback forKey:request];
+		[strongSelf.startFeedbacks setObject:@{ kSuccessFeedbackKey: successFeedback, kFailFeedbackKey: failFeedback } forKey:request];
 		[request setDelegate:strongSelf];
 		[request start];
 	});
@@ -100,28 +123,67 @@
 
 -(void)productsRequest:(SKProductsRequest *)request didReceiveResponse:(SKProductsResponse *)response
 {
-	Feedback *feedback = [_startRequests objectForKey:request];
-	if (feedback != nil) {
-		// todo: implement
-		[_startRequests removeObjectForKey:request];
+	NSDictionary *feedbacks = [_startFeedbacks objectForKey:request];
+	if (feedbacks != nil) {
+		NSInteger count = response.products.count;
+		
+		logmsg(@"[Billing] Start succeded. Product count: %ld.", count);
+		
+		NSMutableDictionary<NSString *, SKProduct *> *products = [[NSMutableDictionary alloc] initWithCapacity:count];
+		for (SKProduct *product in response.products) {
+			[products setObject:product forKey:product.productIdentifier];
+		}
+		
+		_products = [[NSDictionary alloc] initWithDictionary:products];
+		
+		[feedbacks[kSuccessFeedbackKey] respond:[[self class] buildLaunchSuccessResponse:_products]];
+	} else {
+		logmsg(@"[Billing] Success start response with undefined feedbacks.");
 	}
 }
 
 -(void)requestDidFinish:(SKRequest *)request
 {
-	// todo: understand why and for what
+	[_startFeedbacks removeObjectForKey:request]; // important to forget request
 }
 
 -(void)request:(SKRequest *)request didFailWithError:(NSError *)error
 {
-	Feedback *feedback = [_startRequests objectForKey:request];
-	if (feedback != nil) {
-		[feedback respond:@{@"Success": @(NO),
-							@"Error": error.localizedDescription,
-							@"Products": @{},
-							}];
-		[_startRequests removeObjectForKey:request];
+	NSDictionary *feedbacks = [_startFeedbacks objectForKey:request];
+	if (feedbacks != nil) {
+		[feedbacks[kFailFeedbackKey] respond:[[self class] buildLaunchFailResponse:error]];
 	}
+}
+
+#pragma mark - Response Building
+
++(NSDictionary *)buildLaunchSuccessResponse:(NSDictionary<NSString *, SKProduct *> *)products
+{
+	NSMutableArray *models = [[NSMutableArray alloc] initWithCapacity:products.count];
+	for (NSString *key in products) {
+		SKProduct *product = products[key];
+		
+		NSNumberFormatter *formatter = [NSNumberFormatter new];
+		[formatter setNumberStyle:NSNumberFormatterCurrencyStyle];
+		[formatter setLocale:product.priceLocale];
+		NSString *localizedPrice = [formatter stringFromNumber:product.price];
+		
+		float price = [product.price floatValue];
+		
+		[models addObject:@{ kProductIdentifierKey: product.productIdentifier,
+							 kProductLocalizedDescriptionKey: product.localizedDescription,
+							 kProductLocalizedTitleKey: product.localizedTitle,
+							 kProductLocalizedPriceKey: localizedPrice,
+							 kProductPriceKey: @(price)
+							 }];
+	}
+	
+	return @{ kProductsKey: models };
+}
+
++(NSDictionary *)buildLaunchFailResponse:(NSError *)error
+{
+	return @{ kMessageKey: error.localizedDescription };
 }
 
 @end

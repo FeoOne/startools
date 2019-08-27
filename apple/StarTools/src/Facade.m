@@ -10,30 +10,28 @@
 
 #pragma mark - MessageCenter
 
-void RegisterMessageCenterDelegate(MessageCenterDelegate delegate)
+void StarTools_RegisterMessageCenterDelegate(MessageCenterDelegate delegate)
 {
 	[Core setMessageCenterDelegate:delegate];
 }
 
 #pragma mark - Feedback
 
-void RegisterFeedbackDelegate(FeedbackDelegate delegate)
+void StarTools_RegisterFeedbackDelegate(FeedbackDelegate delegate)
 {
 	[Feedback setFeedbackDelegate:delegate];
 }
 
 #pragma mark - Billing
 
-void BillingRegisterProductIdentifier(const char *identifier)
+void StarTools_Billing_RegisterProductIdentifier(const char *identifier)
 {
 	if (identifier != NULL) {
 		[[Core billing] registerProductIdentifier:[NSString stringWithUTF8String:identifier]];
 	}
 }
 
-void BillingStart(ManagedAction action)
+void StarTools_Billing_Launch(ManagedAction onSuccess, ManagedAction onFail)
 {
-	if (action != NULL) {
-		[[Core billing] startWithFeedback:[[Feedback alloc] initWithUnityAction:action]];
-	}
+	[[Core billing] launchWithSuccessFeedback:[Feedback newWithManagedAction:onSuccess] andFailFeedback:[Feedback newWithManagedAction:onFail]];
 }

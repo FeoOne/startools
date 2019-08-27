@@ -1,6 +1,6 @@
 namespace StarTools.Core.Google
 {
-    /*public static class MessageHandler
+    public static class MessageCenter
     {
         private class JavaMessageHandler : AndroidJavaProxy
         {
@@ -19,5 +19,5 @@ namespace StarTools.Core.Google
             _bridgeJavaClass = new AndroidJavaClass("com.startools.UnityBridge");
             _bridgeJavaClass.CallStatic("registerMessageHandler", new JavaMessageHandler());
         }
-    }*/
+    }
 }

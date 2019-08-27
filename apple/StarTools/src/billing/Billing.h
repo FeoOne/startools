@@ -18,7 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(instancetype)init;
 
 -(void)registerProductIdentifier:(NSString *)identifier;
--(void)startWithFeedback:(Feedback *)feedback;
+-(void)launchWithSuccessFeedback:(Feedback *)successFeedback andFailFeedback:(Feedback *)failFeedback;
 
 @end
 

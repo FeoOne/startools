@@ -18,8 +18,10 @@ typedef void (*FeedbackDelegate)(ManagedAction action, const char *data);
 
 @property(nonatomic, readonly) ManagedAction action;
 
--(instancetype)initWithUnityAction:(ManagedAction)action;
+-(instancetype)initWithManagedAction:(ManagedAction)action;
 -(void)respond:(nullable NSDictionary *)params;
+
++(instancetype)newWithManagedAction:(ManagedAction)action;
 
 +(FeedbackDelegate)getFeedbackDelegate;
 +(void)setFeedbackDelegate:(FeedbackDelegate)feedbackDelegate;

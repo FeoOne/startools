@@ -14,15 +14,15 @@
 
 /*	MessageCenter.
  */
-FOUNDATION_EXPORT void RegisterMessageCenterDelegate(MessageCenterDelegate delegate);
+FOUNDATION_EXPORT void StarTools_RegisterMessageCenterDelegate(MessageCenterDelegate delegate);
 
 /*	Feedback.
  */
-FOUNDATION_EXPORT void RegisterFeedbackDelegate(FeedbackDelegate delegate);
+FOUNDATION_EXPORT void StarTools_RegisterFeedbackDelegate(FeedbackDelegate delegate);
 
 /*	Billing.
  */
-FOUNDATION_EXPORT void BillingRegisterProductIdentifier(const char *identifier);
-FOUNDATION_EXPORT void BillingStart(ManagedAction action);
+FOUNDATION_EXPORT void StarTools_Billing_RegisterProductIdentifier(const char *identifier);
+FOUNDATION_EXPORT void StarTools_Billing_Launch(ManagedAction onSuccess, ManagedAction onFail);
 
 #endif /* Facade_h */

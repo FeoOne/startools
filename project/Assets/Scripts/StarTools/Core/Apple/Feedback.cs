@@ -4,12 +4,12 @@ using UnityEngine;
 
 namespace StarTools.Core.Apple
 {
-    public class Feedback
+    public static class Feedback
     {
         private delegate void CallbackDelegate(IntPtr ptr, string data);
 
         [DllImport("__Internal")]
-        private static extern void RegisterFeedbackDelegate(CallbackDelegate callbackDelegate);
+        private static extern void StarTools_RegisterFeedbackDelegate(CallbackDelegate callbackDelegate);
 
         [AOT.MonoPInvokeCallback(typeof(CallbackDelegate))]
         private static void CallbackInvoke(IntPtr ptr, string data)
@@ -89,7 +89,7 @@ namespace StarTools.Core.Apple
             return Newtonsoft.Json.JsonConvert.DeserializeObject(value, type);
         }
 
-        public static IntPtr ObjectToIntPtr(object obj)
+        private static IntPtr ObjectToIntPtr(object obj)
         {
             if (obj == null)
             {
@@ -108,7 +108,7 @@ namespace StarTools.Core.Apple
         [RuntimeInitializeOnLoadMethod]
         private static void Setup()
         {
-            RegisterFeedbackDelegate(CallbackInvoke);
+            StarTools_RegisterFeedbackDelegate(CallbackInvoke);
         }
     }
 }

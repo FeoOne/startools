@@ -7,25 +7,19 @@ namespace StarTools.Billing
     public static class Billing
     {
         [DllImport("__Internal", CharSet = CharSet.Ansi)]
-        private static extern void BillingRegisterProductIdentifier(string identifier);
+        private static extern void StarTools_Billing_RegisterProductIdentifier(string identifier);
 
         [DllImport("__Internal")]
-        private static extern void BillingStart(IntPtr callback);
+        private static extern void StarTools_Billing_Launch(IntPtr onSuccessCallback, IntPtr onFailCallback);
 
-        public class StartResponse
-        {
-            public bool Success;
-            public string Error;
-        }
-        
         public static void RegisterProductIdentifier(string identifier)
         {
-            BillingRegisterProductIdentifier(identifier);
+            StarTools_Billing_RegisterProductIdentifier(identifier);
         }
 
-        public static void Start(Action<StartResponse> onResponse)
+        public static void Launch(Action<Response.StartSuccess> onSuccess, Action<Response.StartFail> onFail)
         {
-            BillingStart(Feedback.ActionToIntPtr(onResponse));
+            StarTools_Billing_Launch(Feedback.ActionToIntPtr(onSuccess), Feedback.ActionToIntPtr(onFail));
         }
     }
 }
