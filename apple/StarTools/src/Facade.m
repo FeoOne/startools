@@ -12,6 +12,8 @@
 
 void StarTools_RegisterMessageCenterDelegate(MessageCenterDelegate delegate)
 {
+	logmsg("StarTools_RegisterMessageCenterDelegate(%p)", delegate);
+	
 	[Core setMessageCenterDelegate:delegate];
 }
 
@@ -19,6 +21,8 @@ void StarTools_RegisterMessageCenterDelegate(MessageCenterDelegate delegate)
 
 void StarTools_RegisterFeedbackDelegate(FeedbackDelegate delegate)
 {
+	logmsg("StarTools_RegisterFeedbackDelegate(%p)", delegate);
+	
 	[Feedback setFeedbackDelegate:delegate];
 }
 

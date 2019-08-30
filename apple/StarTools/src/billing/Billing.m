@@ -20,6 +20,7 @@ static const NSString * const kFailFeedbackKey = @"fail";
 // success
 static const NSString * const kProductsKey = @"Products";
 // fail
+static const NSString * const kCodeKey = @"Code";
 static const NSString * const kMessageKey = @"Message";
 
 /*	Product json keys
@@ -70,6 +71,8 @@ static const NSString * const kProductPriceKey = @"Price";
 
 -(void)launchWithSuccessFeedback:(Feedback *)successFeedback andFailFeedback:(Feedback *)failFeedback
 {
+	__block NSDictionary *feedbacks = @{ kSuccessFeedbackKey: successFeedback, kFailFeedbackKey: failFeedback };
+	
 	DEF_WEAK_SELF;
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 		DEF_STRONG_SELF;
@@ -77,7 +80,7 @@ static const NSString * const kProductPriceKey = @"Price";
 		logmsg("[Billing] Launch initiated...");
 		
 		SKProductsRequest *request = [[SKProductsRequest alloc] initWithProductIdentifiers:strongSelf.identifiers];
-		[strongSelf.startFeedbacks setObject:@{ kSuccessFeedbackKey: successFeedback, kFailFeedbackKey: failFeedback } forKey:request];
+		[strongSelf.startFeedbacks setObject:feedbacks forKey:request];
 		[request setDelegate:strongSelf];
 		[request start];
 	});
@@ -183,7 +186,7 @@ static const NSString * const kProductPriceKey = @"Price";
 
 +(NSDictionary *)buildLaunchFailResponse:(NSError *)error
 {
-	return @{ kMessageKey: error.localizedDescription };
+	return @{ kCodeKey: @(error.code), kMessageKey: error.localizedDescription };
 }
 
 @end
