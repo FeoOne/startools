@@ -12,7 +12,7 @@
 
 void StarTools_RegisterMessageCenterDelegate(MessageCenterDelegate delegate)
 {
-	logmsg("StarTools_RegisterMessageCenterDelegate(%p)", delegate);
+	logmsg(@"StarTools_RegisterMessageCenterDelegate(%p)", delegate);
 	
 	[Core setMessageCenterDelegate:delegate];
 }
@@ -21,21 +21,61 @@ void StarTools_RegisterMessageCenterDelegate(MessageCenterDelegate delegate)
 
 void StarTools_RegisterFeedbackDelegate(FeedbackDelegate delegate)
 {
-	logmsg("StarTools_RegisterFeedbackDelegate(%p)", delegate);
+	logmsg(@"StarTools_RegisterFeedbackDelegate(%p)", delegate);
 	
 	[Feedback setFeedbackDelegate:delegate];
 }
 
 #pragma mark - Billing
 
-void StarTools_Billing_RegisterProductIdentifier(const char *identifier)
+void StarTools_Billing_RegisterLaunchSucceededFeedback(ManagedAction action)
 {
-	if (identifier != NULL) {
-		[[Core billing] registerProductIdentifier:[NSString stringWithUTF8String:identifier]];
+	if (action != NULL) {
+		[[Core billing] registerFeedback:[Feedback feedbackWithManagedAction:action] forKey:kLaunchSucceededKey];
 	}
 }
 
-void StarTools_Billing_Launch(ManagedAction onSuccess, ManagedAction onFail)
+void StarTools_Billing_RegisterLaunchFailedFeedback(ManagedAction action)
 {
-	[[Core billing] launchWithSuccessFeedback:[Feedback newWithManagedAction:onSuccess] andFailFeedback:[Feedback newWithManagedAction:onFail]];
+	if (action != NULL) {
+		[[Core billing] registerFeedback:[Feedback feedbackWithManagedAction:action] forKey:kLaunchFailedKey];
+	}
+}
+
+void StarTools_Billing_RegisterPurchaseSucceededFeedback(ManagedAction action)
+{
+	if (action != NULL) {
+		[[Core billing] registerFeedback:[Feedback feedbackWithManagedAction:action] forKey:kPurchaseSucceededKey];
+	}
+}
+
+void StarTools_Billing_RegisterPurchaseFailedFeedback(ManagedAction action)
+{
+	if (action != NULL) {
+		[[Core billing] registerFeedback:[Feedback feedbackWithManagedAction:action] forKey:kPurchaseFailedKey];
+	}
+}
+
+void StarTools_Billing_RegisterPurchaseRestoredFeedback(ManagedAction action)
+{
+	
+}
+
+void StarTools_Billing_RegisterProduct(const char *identifier, int type)
+{
+	if (identifier != NULL) {
+		[[Core billing] registerProductIdentifier:[NSString stringWithUTF8String:identifier] andType:type];
+	}
+}
+
+void StarTools_Billing_Launch(void)
+{
+	[[Core billing] launch];
+}
+
+void StarTools_Billing_Purchase(const char *identifier)
+{
+	if (identifier != NULL) {
+		[[Core billing] purchase:[NSString stringWithUTF8String:identifier]];
+	}
 }

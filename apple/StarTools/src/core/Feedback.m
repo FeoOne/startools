@@ -16,9 +16,9 @@
 
 @implementation Feedback
 
-+(instancetype)newWithManagedAction:(ManagedAction)action;
++(instancetype)feedbackWithManagedAction:(ManagedAction)action;
 {
-	return [[Feedback alloc] initWithManagedAction:action];
+	return [[[self class] alloc] initWithManagedAction:action];
 }
 
 -(instancetype)initWithManagedAction:(ManagedAction)action
@@ -44,7 +44,7 @@
 		if (error == nil) {
 			json = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 		} else {
-			logmsg("Can't respond. JSON serialization error: %@", error.localizedDescription);
+			logmsg(@"Can't respond. JSON serialization error: %@", error.localizedDescription);
 		}
 	}
 	

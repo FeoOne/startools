@@ -15,6 +15,11 @@
 		BDB16CBE23141BC200931E04 /* Feedback.m in Sources */ = {isa = PBXBuildFile; fileRef = BDB16CBC23141BC200931E04 /* Feedback.m */; };
 		BDC3A30923052D23002E249A /* Core.h in Headers */ = {isa = PBXBuildFile; fileRef = BDC3A30723052D23002E249A /* Core.h */; };
 		BDC3A30A23052D23002E249A /* Core.m in Sources */ = {isa = PBXBuildFile; fileRef = BDC3A30823052D23002E249A /* Core.m */; };
+		BDEEA120231CE95D003B46AF /* Product.h in Headers */ = {isa = PBXBuildFile; fileRef = BDEEA11E231CE95D003B46AF /* Product.h */; };
+		BDEEA121231CE95D003B46AF /* Product.m in Sources */ = {isa = PBXBuildFile; fileRef = BDEEA11F231CE95D003B46AF /* Product.m */; };
+		BDEEA124231CEC00003B46AF /* BillingResponder.h in Headers */ = {isa = PBXBuildFile; fileRef = BDEEA122231CEC00003B46AF /* BillingResponder.h */; };
+		BDEEA125231CEC00003B46AF /* BillingResponder.m in Sources */ = {isa = PBXBuildFile; fileRef = BDEEA123231CEC00003B46AF /* BillingResponder.m */; };
+		BDEEA128231D4F8F003B46AF /* Facade.h in Headers */ = {isa = PBXBuildFile; fileRef = BDB16CAC2313F44700931E04 /* Facade.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +35,10 @@
 		BDB16CBC23141BC200931E04 /* Feedback.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Feedback.m; sourceTree = "<group>"; };
 		BDC3A30723052D23002E249A /* Core.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Core.h; sourceTree = "<group>"; };
 		BDC3A30823052D23002E249A /* Core.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Core.m; sourceTree = "<group>"; };
+		BDEEA11E231CE95D003B46AF /* Product.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Product.h; sourceTree = "<group>"; };
+		BDEEA11F231CE95D003B46AF /* Product.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Product.m; sourceTree = "<group>"; };
+		BDEEA122231CEC00003B46AF /* BillingResponder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BillingResponder.h; sourceTree = "<group>"; };
+		BDEEA123231CEC00003B46AF /* BillingResponder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BillingResponder.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -97,6 +106,10 @@
 			children = (
 				BDB16CA72313CD3F00931E04 /* Billing.h */,
 				BDB16CA82313CD3F00931E04 /* Billing.m */,
+				BDEEA11E231CE95D003B46AF /* Product.h */,
+				BDEEA11F231CE95D003B46AF /* Product.m */,
+				BDEEA122231CEC00003B46AF /* BillingResponder.h */,
+				BDEEA123231CEC00003B46AF /* BillingResponder.m */,
 			);
 			path = billing;
 			sourceTree = "<group>";
@@ -109,7 +122,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				BDC3A30923052D23002E249A /* Core.h in Headers */,
+				BDEEA120231CE95D003B46AF /* Product.h in Headers */,
+				BDEEA128231D4F8F003B46AF /* Facade.h in Headers */,
 				BDB16CBD23141BC200931E04 /* Feedback.h in Headers */,
+				BDEEA124231CEC00003B46AF /* BillingResponder.h in Headers */,
 				BDB16CA92313CD3F00931E04 /* Billing.h in Headers */,
 				BD222B5723027B3F0099F193 /* StarTools.h in Headers */,
 			);
@@ -183,8 +199,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				BDC3A30A23052D23002E249A /* Core.m in Sources */,
+				BDEEA121231CE95D003B46AF /* Product.m in Sources */,
 				BDB16CAE2313F4BB00931E04 /* Facade.m in Sources */,
 				BDB16CBE23141BC200931E04 /* Feedback.m in Sources */,
+				BDEEA125231CEC00003B46AF /* BillingResponder.m in Sources */,
 				BDB16CAA2313CD3F00931E04 /* Billing.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -196,12 +214,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					arm64,
-					arm7s,
-					arm7,
-					arm64e,
-				);
+				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -250,7 +263,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = NO;
@@ -264,12 +277,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					arm64,
-					arm7s,
-					arm7,
-					arm64e,
-				);
+				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -312,7 +320,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;

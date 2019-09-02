@@ -56,7 +56,7 @@ static MessageCenterDelegate _messageCenterDelegate = NULL;
 		if (error == nil) {
 			_json = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 		} else {
-			logmsg("Can't send message to managed. JSON serialization error: %@", error.localizedDescription);
+			logmsg(@"Can't send message to managed. JSON serialization error: %@", error.localizedDescription);
 		}
 	}
 	

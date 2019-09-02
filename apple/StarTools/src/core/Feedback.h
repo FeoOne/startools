@@ -21,7 +21,7 @@ typedef void (*FeedbackDelegate)(ManagedAction action, const char *data);
 -(instancetype)initWithManagedAction:(ManagedAction)action;
 -(void)respond:(nullable NSDictionary *)params;
 
-+(instancetype)newWithManagedAction:(ManagedAction)action;
++(instancetype)feedbackWithManagedAction:(ManagedAction)action;
 
 +(FeedbackDelegate)getFeedbackDelegate;
 +(void)setFeedbackDelegate:(FeedbackDelegate)feedbackDelegate;

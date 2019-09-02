@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace StarTools.Billing.Platform.Google
 {
+#if UNITY_ANDROID
     public sealed class Billing : AbstractBilling
     {
         private readonly AndroidJavaObject _billing;
@@ -18,9 +19,39 @@ namespace StarTools.Billing.Platform.Google
             _billing?.Call("registerProduct", identifier, (int)type);
         }
 
-        public override void Launch(Action<Data.LaunchSucceeded> onSuccess, Action<Data.LaunchFailed> onFail)
+        public override void Launch()
         {
-            _billing?.Call("launch", Feedback.ActionToFeedback(onSuccess), Feedback.ActionToFeedback(onFail));
+            _billing?.Call("launch");
+        }
+        
+        public override void Purchase(string identifier)
+        {
+            
+        }
+        
+        /**
+         * Feedbacks.
+         */
+        
+        public override void RegisterLaunchSucceededFeedback(Action<Data.LaunchSucceeded> action)
+        {
+            
+        }
+
+        public override void RegisterLaunchFailedFeedback(Action<Data.LaunchFailed> action)
+        {
+            
+        }
+
+        public override void RegisterPurchaseSucceededFeedback(Action<Data.PurchaseSucceeded> action)
+        {
+            
+        }
+
+        public override void RegisterPurchaseFailedFeedback(Action<Data.PurchaseFailed> action)
+        {
+            
         }
     }
+#endif
 }

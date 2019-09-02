@@ -1,6 +1,6 @@
 namespace StarTools.Billing.Data
 {
-    public class Product
+    public class ProductMetadata
     {
         public string Identifier;
         public string LocalizedDescription;
