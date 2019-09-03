@@ -26,6 +26,7 @@ extern NSString * const kPurchaseRestoredKey;
 -(void)registerProductIdentifier:(NSString *)identifier andType:(NSInteger)type;
 -(void)launch;
 -(void)purchase:(NSString *)identifier;
+-(void)restorePurchases;
 -(BOOL)canMakePayments;
 
 -(void)registerFeedback:(Feedback *)feedback forKey:(NSString *)key;

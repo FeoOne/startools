@@ -13,6 +13,7 @@
 // shared
 static const NSString * const kCodeKey = @"Code";
 static const NSString * const kMessageKey = @"Message";
+static const NSString * const kIdentifierKey = @"Identifier";
 // launch success
 static const NSString * const kProductsKey = @"Products";
 // purchase fail
@@ -20,7 +21,6 @@ static const NSString * const kIsCancelledKey = @"IsCancelled";
 
 /*	Product json keys
  */
-static const NSString * const kProductIdentifierKey = @"Identifier";
 static const NSString * const kProductLocalizedDescriptionKey = @"LocalizedDescription";
 static const NSString * const kProductLocalizedTitleKey = @"LocalizedTitle";
 static const NSString * const kProductLocalizedPriceKey = @"LocalizedPrice";
@@ -41,7 +41,7 @@ static const NSString * const kProductPriceKey = @"Price";
 		
 		float price = [product.price floatValue];
 		
-		[models addObject:@{ kProductIdentifierKey: product.productIdentifier,
+		[models addObject:@{ kIdentifierKey: product.productIdentifier,
 							 kProductLocalizedDescriptionKey: product.localizedDescription,
 							 kProductLocalizedTitleKey: product.localizedTitle,
 							 kProductLocalizedPriceKey: localizedPrice,
@@ -57,7 +57,15 @@ static const NSString * const kProductPriceKey = @"Price";
 	return @{ kCodeKey: @(error.code), kMessageKey: error.localizedDescription };
 }
 
++(NSDictionary *)buildPurchaseSucceededResponse:(SKPaymentTransaction *)transaction
+{
+	return @{ kIdentifierKey: transaction.payment.productIdentifier };
+}
 
++(NSDictionary *)buildPurchaseRestoredResponse:(SKPaymentTransaction *)transaction
+{
+	return @{ kIdentifierKey: transaction.payment.productIdentifier };
+}
 
 +(NSDictionary *)buildPurchaseFailedResponse:(NSError *)error
 {

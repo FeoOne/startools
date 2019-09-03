@@ -49,16 +49,18 @@ void StarTools_Billing_RegisterPurchaseSucceededFeedback(ManagedAction action)
 	}
 }
 
+void StarTools_Billing_RegisterPurchaseRestoredFeedback(ManagedAction action)
+{
+	if (action != NULL) {
+		[[Core billing] registerFeedback:[Feedback feedbackWithManagedAction:action] forKey:kPurchaseRestoredKey];
+	}
+}
+
 void StarTools_Billing_RegisterPurchaseFailedFeedback(ManagedAction action)
 {
 	if (action != NULL) {
 		[[Core billing] registerFeedback:[Feedback feedbackWithManagedAction:action] forKey:kPurchaseFailedKey];
 	}
-}
-
-void StarTools_Billing_RegisterPurchaseRestoredFeedback(ManagedAction action)
-{
-	
 }
 
 void StarTools_Billing_RegisterProduct(const char *identifier, int type)
@@ -78,4 +80,14 @@ void StarTools_Billing_Purchase(const char *identifier)
 	if (identifier != NULL) {
 		[[Core billing] purchase:[NSString stringWithUTF8String:identifier]];
 	}
+}
+
+void StarTools_Billing_RestorePurchases(void)
+{
+	[[Core billing] restorePurchases];
+}
+
+bool StarTools_Billing_CanMakePurchases(void)
+{
+	return [[Core billing] canMakePayments] == YES;
 }

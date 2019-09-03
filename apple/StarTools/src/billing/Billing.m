@@ -27,8 +27,6 @@ NSString * const kPurchaseFailedKey 		= @"purchase-failed";
 NSString * const kPurchaseRestoredKey 		= @"purchase-restored";
 
 @interface Billing () <SKProductsRequestDelegate, SKPaymentTransactionObserver>
-{
-}
 
 @property(strong, nonatomic) NSMutableDictionary<NSString *, Product *> *products;
 @property(strong, nonatomic) NSMutableDictionary<NSString *, Feedback *> *feedbacks;
@@ -38,6 +36,7 @@ NSString * const kPurchaseRestoredKey 		= @"purchase-restored";
 -(void)_registerProductIdentifier:(NSString *)identifier andType:(NSInteger)type;
 -(void)_launch;
 -(void)_purchase:(NSString *)identifier;
+-(void)_restorePurchases;
 -(BOOL)_canMakePayments;
 
 -(void)onPaymentTransactionPurchased:(SKPaymentTransaction *)transaction;
@@ -86,6 +85,13 @@ NSString * const kPurchaseRestoredKey 		= @"purchase-restored";
 	}
 }
 
+-(void)restorePurchases
+{
+	@synchronized (self) {
+		[self _restorePurchases];
+	}
+}
+
 -(BOOL)canMakePayments
 {
 	@synchronized (self) {
@@ -97,26 +103,26 @@ NSString * const kPurchaseRestoredKey 		= @"purchase-restored";
 
 -(void)_registerProductIdentifier:(NSString *)identifier andType:(NSInteger)type
 {
+	if (_state != kLaunchState_NotLaunched) {
+		logmsg(@"[Billing] Billing launched. Late to drink borjomi.");
+		return;
+	}
+	
 	Product *product = [_products objectForKey:identifier];
 	if (product == nil) {
 		product = [Product productWithIdentifier:identifier andType:(ProductType)type];
 		[_products setObject:product forKey:identifier];
 		
-		logmsg(@"Added product identifier '%@'.", identifier);
+		logmsg(@"[Billing] Added product identifier '%@'.", identifier);
 	} else {
-		logmsg(@"Product '%@' already added.", identifier);
+		logmsg(@"[Billing] Product '%@' already added.", identifier);
 	}
 }
 
 -(void)_launch
 {
 	if (_state != kLaunchState_NotLaunched) {
-		logmsg(@"Billing already launched.");
-		return;
-	}
-	
-	if ([_feedbacks objectForKey:kLaunchSucceededKey] == nil || [_feedbacks objectForKey:kLaunchFailedKey] == nil) {
-		logmsg(@"Launch feedbacks did not set.");
+		logmsg(@"[Billing] Billing already launched.");
 		return;
 	}
 	
@@ -126,7 +132,7 @@ NSString * const kPurchaseRestoredKey 		= @"purchase-restored";
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 		DEF_STRONG_SELF;
 		
-		logmsg(@"Billing launch started...");
+		logmsg(@"[Billing] Billing launch started...");
 		
 		NSSet *identifiers = [NSSet setWithArray:[strongSelf.products allKeys]];
 		SKProductsRequest *request = [[SKProductsRequest alloc] initWithProductIdentifiers:identifiers];
@@ -138,23 +144,28 @@ NSString * const kPurchaseRestoredKey 		= @"purchase-restored";
 -(void)_purchase:(NSString *)identifier
 {
 	if (_state != kLaunchState_Launched) {
-		logmsg(@"Billing did not launched.");
-		return;
-	}
-	
-	if ([_feedbacks objectForKey:kPurchaseSucceededKey] == nil || [_feedbacks objectForKey:kPurchaseFailedKey] == nil) {
-		logmsg(@"Purchase feedbacks did not set.");
+		logmsg(@"[Billing] Billing did not launched.");
 		return;
 	}
 	
 	Product *product = _products[identifier];
 	if (product == nil || product.storeKitProduct == nil) {
-		logmsg(@"Can't purchase product '%@'. Identifier not found or StoreKit product doesn't assigned.", identifier);
+		logmsg(@"[Billing] Can't purchase product '%@'. Identifier not found or StoreKit product doesn't assigned.", identifier);
 		return;
 	}
 	
 	SKMutablePayment *payment = [SKMutablePayment paymentWithProduct:product.storeKitProduct];
 	[SKPAYMENTQUEUE addPayment:payment];
+}
+
+-(void)_restorePurchases
+{
+	if (_state != kLaunchState_Launched) {
+		logmsg(@"[Billing] Billing did not launched.");
+		return;
+	}
+	
+	[SKPAYMENTQUEUE restoreCompletedTransactions];
 }
 
 -(BOOL)_canMakePayments
@@ -166,31 +177,50 @@ NSString * const kPurchaseRestoredKey 		= @"purchase-restored";
 
 -(void)onPaymentTransactionPurchased:(SKPaymentTransaction *)transaction
 {
-	logmsg(@"Purchase '%@' succeeded.", transaction.payment.productIdentifier);
+	logmsg(@"[Billing] Purchase '%@' succeeded.", transaction.payment.productIdentifier);
+	
 	[SKPAYMENTQUEUE finishTransaction:transaction];
 	
-	Product *product = [_products objectForKey:transaction.payment.productIdentifier];
-	
-	
-	
-	
+	Feedback *feedback = [_feedbacks objectForKey:kPurchaseSucceededKey];
+	if (feedback != nil) {
+		[feedback respond:[BillingResponder buildPurchaseSucceededResponse:transaction]];
+	} else {
+		logmsg(@"[Billing] Can't respond OnPaymentTransactionPurchased. Feedback not set.");
+	}
 }
 
 -(void)onPaymentTransactionRestored:(SKPaymentTransaction *)transaction
 {
+	logmsg(@"[Billing] Purchase '%@' restored.", transaction.payment.productIdentifier);
 	
+	[SKPAYMENTQUEUE finishTransaction:transaction];
+	
+	Feedback *feedback = [_feedbacks objectForKey:kPurchaseRestoredKey];
+	if (feedback != nil) {
+		[feedback respond:[BillingResponder buildPurchaseRestoredResponse:transaction]];
+	} else {
+		logmsg(@"[Billing] Can't respond OnPaymentTransactionRestored. Feedback not set.");
+	}
 }
 
 -(void)onPaymentTransactionFailed:(SKPaymentTransaction *)transaction
 {
+	logmsg(@"[Billing] Purchase '%@' failed.", transaction.payment.productIdentifier);
+	
+	[SKPAYMENTQUEUE finishTransaction:transaction];
+	
 	NSError *error = transaction.error;
 	if (error == nil) {
-		logmsg(@"OnPaymentTransactionFailed internal error.");
+		logmsg(@"[Billing] OnPaymentTransactionFailed internal error.");
 		error = [NSError errorWithDomain:StarToolsErrorDomain code:-1 userInfo:nil];
 	}
 	
 	Feedback *feedback = [_feedbacks objectForKey:kPurchaseFailedKey];
-	[feedback respond:[BillingResponder buildPurchaseFailedResponse:error]];
+	if (feedback != nil) {
+		[feedback respond:[BillingResponder buildPurchaseFailedResponse:error]];
+	} else {
+		logmsg(@"[Billing] Can't respond OnPaymentTransactionFailed. Feedback not set.");
+	}
 }
 
 #pragma mark - SKPaymentTransactionObserver
@@ -200,7 +230,7 @@ NSString * const kPurchaseRestoredKey 		= @"purchase-restored";
 	for (SKPaymentTransaction *transaction in transactions) {
 		switch (transaction.transactionState) {
 			case SKPaymentTransactionStatePurchasing: {
-				logmsg(@"SKPaymentTransactionStatePurchasing");
+				logmsg(@"[Billing] SKPaymentTransactionStatePurchasing");
 				break;
 			}
 			case SKPaymentTransactionStateDeferred: {
@@ -225,22 +255,24 @@ NSString * const kPurchaseRestoredKey 		= @"purchase-restored";
 
 -(void)paymentQueue:(SKPaymentQueue *)queue removedTransactions:(NSArray<SKPaymentTransaction *> *)transactions
 {
-	
+	// todo
 }
 
 -(void)paymentQueue:(SKPaymentQueue *)queue restoreCompletedTransactionsFailedWithError:(NSError *)error
 {
-	
+	logmsg(@"[Billing] Purchases restored with error: %@", error.localizedDescription);
+	// todo
 }
 
 -(void)paymentQueueRestoreCompletedTransactionsFinished:(SKPaymentQueue *)queue
 {
-	
+	logmsg(@"[Billing] Purchases restored successfully.");
+	// todo
 }
 
 -(void)paymentQueue:(SKPaymentQueue *)queue updatedDownloads:(NSArray<SKDownload *> *)downloads
 {
-	
+	// todo
 }
 
 -(BOOL)paymentQueue:(SKPaymentQueue *)queue shouldAddStorePayment:(SKPayment *)payment forProduct:(SKProduct *)product
@@ -269,12 +301,16 @@ NSString * const kPurchaseRestoredKey 		= @"purchase-restored";
 	
 	// check invalid identifiers
 	for (NSString *identifier in response.invalidProductIdentifiers) {
-		logmsg(@"Invalid product identifier: '%@'.", identifier);
+		logmsg(@"[Billing] Invalid product identifier: '%@'.", identifier);
 		[_products removeObjectForKey:identifier];
 	}
 	
 	Feedback *feedback = [_feedbacks objectForKey:kLaunchSucceededKey];
-	[feedback respond:[BillingResponder buildLaunchSuccessResponse:_products]];
+	if (feedback != nil) {
+		[feedback respond:[BillingResponder buildLaunchSuccessResponse:_products]];
+	} else {
+		logmsg(@"[Billing] Can't respond OnLaunchSucceeded. Feedback not set.");
+	}
 	
 	_state = kLaunchState_Launched;
 }
@@ -282,14 +318,18 @@ NSString * const kPurchaseRestoredKey 		= @"purchase-restored";
 -(void)request:(SKRequest *)request didFailWithError:(NSError *)error
 {
 	Feedback *feedback = [_feedbacks objectForKey:kLaunchFailedKey];
-	[feedback respond:[BillingResponder buildLaunchFailResponse:error]];
+	if (feedback != nil) {
+		[feedback respond:[BillingResponder buildLaunchFailResponse:error]];
+	} else {
+		logmsg(@"[Billing] Can't respond OnLaunchFailed. Feedback not set.");
+	}
 	
 	_state = kLaunchState_NotLaunched;
 }
 
 -(void)requestDidFinish:(SKRequest *)request
 {
-	logmsg(@"Billing launch finished.");
+	logmsg(@"[Billing] Billing launch finished.");
 }
 
 #pragma mark - Feedbacks

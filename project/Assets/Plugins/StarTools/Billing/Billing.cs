@@ -2,36 +2,33 @@ using System;
 using UnityEngine;
 using StarTools.Event;
 using StarTools.Billing.Data;
+using StarTools.Billing.Platform.Apple;
+#if UNITY_IOS
+
+#elif UNITY_ANDROID
+using BillingContext = StarTools.Billing.Platform.Google.Billing;
+#endif
 
 namespace StarTools.Billing
 {
-    public class Billing : AbstractBilling
+    public class Billing : BillingFacade
     {
-        private static AbstractBilling _billing;
+        private static BillingContext _billing;
 
         public static Billing Instance { get; private set; }
 
         public readonly Stream<LaunchSucceeded> LaunchSucceededStream = new Stream<LaunchSucceeded>();
         public readonly Stream<LaunchFailed> LaunchFailedStream = new Stream<LaunchFailed>();
         public readonly Stream<PurchaseSucceeded> PurchaseSucceededStream = new Stream<PurchaseSucceeded>();
-        public readonly Stream<PurchaseFailed> PurchaseFailedStream = new Stream<PurchaseFailed>();
         public readonly Stream<PurchaseRestored> PurchaseRestoredStream = new Stream<PurchaseRestored>();
+        public readonly Stream<PurchaseFailed> PurchaseFailedStream = new Stream<PurchaseFailed>();
 
         [RuntimeInitializeOnLoadMethod]
         private static void Setup()
         {
-            Instance = new Billing();
+            _billing = new BillingContext();
             
-#if !STARTOOLS_DEBUG || !UNITY_EDITOR
-#   if UNITY_IOS
-            _billing = new Platform.Apple.Billing();
-#   elif UNITY_ANDROID
-			_billing = new Platform.Google.Billing();
-#   endif
-#else
-            // todo: stub
-#endif
-
+            Instance = new Billing();
             Instance.RegisterFeedbacks();
         }
         
@@ -57,6 +54,16 @@ namespace StarTools.Billing
         {
             Debug.Assert(!string.IsNullOrWhiteSpace(identifier), "Identifier must be specified.");
             _billing?.Purchase(identifier);
+        }
+
+        public override void RestorePurchases()
+        {
+            _billing?.RestorePurchases();
+        }
+
+        public override bool CanMakePurchases()
+        {
+            return _billing?.CanMakePurchases() ?? false;
         }
 
         private void RegisterFeedbacks()

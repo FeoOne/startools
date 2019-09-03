@@ -16,7 +16,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 +(NSDictionary *)buildLaunchSuccessResponse:(NSDictionary<NSString *, Product *> *)products;
 +(NSDictionary *)buildLaunchFailResponse:(NSError *)error;
-
++(NSDictionary *)buildPurchaseSucceededResponse:(SKPaymentTransaction *)transaction;
++(NSDictionary *)buildPurchaseRestoredResponse:(SKPaymentTransaction *)transaction;
 +(NSDictionary *)buildPurchaseFailedResponse:(NSError *)error;
 
 @end

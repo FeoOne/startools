@@ -25,11 +25,13 @@ FOUNDATION_EXPORT void StarTools_RegisterFeedbackDelegate(FeedbackDelegate deleg
 FOUNDATION_EXPORT void StarTools_Billing_RegisterLaunchSucceededFeedback(ManagedAction action);
 FOUNDATION_EXPORT void StarTools_Billing_RegisterLaunchFailedFeedback(ManagedAction action);
 FOUNDATION_EXPORT void StarTools_Billing_RegisterPurchaseSucceededFeedback(ManagedAction action);
-FOUNDATION_EXPORT void StarTools_Billing_RegisterPurchaseFailedFeedback(ManagedAction action);
 FOUNDATION_EXPORT void StarTools_Billing_RegisterPurchaseRestoredFeedback(ManagedAction action);
+FOUNDATION_EXPORT void StarTools_Billing_RegisterPurchaseFailedFeedback(ManagedAction action);
 
 FOUNDATION_EXPORT void StarTools_Billing_RegisterProduct(const char *identifier, int type);
 FOUNDATION_EXPORT void StarTools_Billing_Launch(void);
 FOUNDATION_EXPORT void StarTools_Billing_Purchase(const char *identifier);
+FOUNDATION_EXPORT void StarTools_Billing_RestorePurchases(void);
+FOUNDATION_EXPORT bool StarTools_Billing_CanMakePurchases(void);
 
 #endif /* Facade_h */
