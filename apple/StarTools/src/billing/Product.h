@@ -12,9 +12,9 @@
 NS_ASSUME_NONNULL_BEGIN
 
 typedef enum {
-	kConsumable = 0,
-	kNonConsumable = 1,
-	kSubscription = 2,
+	kConsumable = 1,
+	kNonConsumable = 2,
+	kSubscription = 4,
 } ProductType;
 
 @interface Product : NSObject

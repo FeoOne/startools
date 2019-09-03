@@ -8,9 +8,9 @@ namespace StarTools.Billing
     {
         public enum ProductType
         {
-            Consumable = 0,
-            NonConsumable = 1,
-            Subscription = 2,
+            Consumable = 1,
+            NonConsumable = 2,
+            Subscription = 4,
         }
 
         public abstract void RegisterProduct(string identifier, ProductType type);

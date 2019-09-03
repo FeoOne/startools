@@ -9,7 +9,7 @@ namespace StarTools.Core.Google
         {
             private readonly Action<T> _action;
             
-            public FeedbackHandler(Action<T> action) : base("com.feosoftware.startools.FeedbackHandler")
+            public FeedbackHandler(Action<T> action) : base("com.feosoftware.startools.core.Feedback")
             {
                 _action = action;
             }

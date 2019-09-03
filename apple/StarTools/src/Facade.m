@@ -28,45 +28,17 @@ void StarTools_RegisterFeedbackDelegate(FeedbackDelegate delegate)
 
 #pragma mark - Billing
 
-void StarTools_Billing_RegisterLaunchSucceededFeedback(ManagedAction action)
+void StarTools_Billing_RegisterFeedback(int32_t key, ManagedAction action)
 {
 	if (action != NULL) {
-		[[Core billing] registerFeedback:[Feedback feedbackWithManagedAction:action] forKey:kLaunchSucceededKey];
+		[[Core billing] registerFeedback:[Feedback feedbackWithManagedAction:action] forKey:@(key)];
 	}
 }
 
-void StarTools_Billing_RegisterLaunchFailedFeedback(ManagedAction action)
-{
-	if (action != NULL) {
-		[[Core billing] registerFeedback:[Feedback feedbackWithManagedAction:action] forKey:kLaunchFailedKey];
-	}
-}
-
-void StarTools_Billing_RegisterPurchaseSucceededFeedback(ManagedAction action)
-{
-	if (action != NULL) {
-		[[Core billing] registerFeedback:[Feedback feedbackWithManagedAction:action] forKey:kPurchaseSucceededKey];
-	}
-}
-
-void StarTools_Billing_RegisterPurchaseRestoredFeedback(ManagedAction action)
-{
-	if (action != NULL) {
-		[[Core billing] registerFeedback:[Feedback feedbackWithManagedAction:action] forKey:kPurchaseRestoredKey];
-	}
-}
-
-void StarTools_Billing_RegisterPurchaseFailedFeedback(ManagedAction action)
-{
-	if (action != NULL) {
-		[[Core billing] registerFeedback:[Feedback feedbackWithManagedAction:action] forKey:kPurchaseFailedKey];
-	}
-}
-
-void StarTools_Billing_RegisterProduct(const char *identifier, int type)
+void StarTools_Billing_RegisterProduct(const char *identifier, int32_t type)
 {
 	if (identifier != NULL) {
-		[[Core billing] registerProductIdentifier:[NSString stringWithUTF8String:identifier] andType:type];
+		[[Core billing] registerProductIdentifier:[NSString stringWithUTF8String:identifier] andType:(NSInteger)type];
 	}
 }
 

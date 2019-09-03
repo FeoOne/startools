@@ -1,7 +1,7 @@
-package com.feosoftware.startools;
+package com.feosoftware.startools.core;
 
 import org.json.JSONObject;
 
-public interface FeedbackHandler {
+public interface Feedback {
     void onResponse(JSONObject response);
 }

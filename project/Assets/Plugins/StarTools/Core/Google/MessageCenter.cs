@@ -9,7 +9,7 @@ namespace StarTools.Core.Google
         
         private sealed class JavaMessageCenter : AndroidJavaProxy
         {
-            public JavaMessageCenter() : base("com.feosoftware.startools.MessageCenterHandler") { }
+            public JavaMessageCenter() : base("com.feosoftware.startools.core.MessageCenter") { }
 
             public void OnMessage(string message, string data)
             {
@@ -21,7 +21,7 @@ namespace StarTools.Core.Google
         {
             _onMessageManagedAction = onMessage;
             
-            new AndroidJavaClass("com.feosoftware.startools.Core")
+            new AndroidJavaClass("com.feosoftware.startools.core.Core")
                 .CallStatic("RegisterMessageCenterHandler", new JavaMessageCenter());
         }
     }

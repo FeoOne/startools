@@ -2,17 +2,25 @@ using System;
 using UnityEngine;
 using StarTools.Event;
 using StarTools.Billing.Data;
-using StarTools.Billing.Platform.Apple;
-#if UNITY_IOS
 
+#if UNITY_IOS
+using StarTools.Billing.Platform.Apple;
 #elif UNITY_ANDROID
-using BillingContext = StarTools.Billing.Platform.Google.Billing;
+using StarTools.Billing.Platform.Google;
 #endif
 
 namespace StarTools.Billing
 {
     public class Billing : BillingFacade
     {
+        private enum FeedbackKey {
+            LaunchSucceeded = 0,
+            LaunchFailed = 1,
+            PurchaseSucceeded = 2,
+            PurchaseRestored = 3,
+            PurchaseFailed = 4,
+        };
+        
         private static BillingContext _billing;
 
         public static Billing Instance { get; private set; }
@@ -68,11 +76,16 @@ namespace StarTools.Billing
 
         private void RegisterFeedbacks()
         {
-            _billing?.RegisterLaunchSucceededFeedback(x => LaunchSucceededStream.Send(x));
-            _billing?.RegisterLaunchFailedFeedback(x => LaunchFailedStream.Send(x));
-            _billing?.RegisterPurchaseSucceededFeedback(x => PurchaseSucceededStream.Send(x));
-            _billing?.RegisterPurchaseFailedFeedback(x => PurchaseFailedStream.Send(x));
-            _billing?.RegisterPurchaseRestoredFeedback(x => PurchaseRestoredStream.Send(x));
+            _billing?.RegisterFeedback<LaunchSucceeded>((int)FeedbackKey.LaunchSucceeded, 
+                x => LaunchSucceededStream.Send(x));
+            _billing?.RegisterFeedback<LaunchFailed>((int)FeedbackKey.LaunchFailed, 
+                x => LaunchFailedStream.Send(x));
+            _billing?.RegisterFeedback<PurchaseSucceeded>((int)FeedbackKey.PurchaseSucceeded, 
+                x => PurchaseSucceededStream.Send(x));
+            _billing?.RegisterFeedback<PurchaseRestored>((int)FeedbackKey.PurchaseRestored, 
+                x => PurchaseRestoredStream.Send(x));
+            _billing?.RegisterFeedback<PurchaseFailed>((int)FeedbackKey.PurchaseFailed, 
+                x => PurchaseFailedStream.Send(x));
         }
     }
 }

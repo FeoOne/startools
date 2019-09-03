@@ -18,18 +18,20 @@ typedef enum {
 	kLaunchState_Launched,
 } LaunchState;
 
-NSString * const StarToolsErrorDomain = @"com.feosoftware.startools";
+typedef enum {
+	kFeedbackKey_LaunchSucceeded = 0,
+	kFeedbackKey_LaunchFailed = 1,
+	kFeedbackKey_PurchaseSucceeded = 2,
+	kFeedbackKey_PurchaseRestored = 3,
+	kFeedbackKey_PurchaseFailed = 4,
+} FeedbackKey;
 
-NSString * const kLaunchSucceededKey 		= @"launch-succeeded";
-NSString * const kLaunchFailedKey 			= @"launch-failed";
-NSString * const kPurchaseSucceededKey 		= @"purchase-succeeded";
-NSString * const kPurchaseFailedKey 		= @"purchase-failed";
-NSString * const kPurchaseRestoredKey 		= @"purchase-restored";
+NSString * const StarToolsErrorDomain = @"com.feosoftware.startools";
 
 @interface Billing () <SKProductsRequestDelegate, SKPaymentTransactionObserver>
 
 @property(strong, nonatomic) NSMutableDictionary<NSString *, Product *> *products;
-@property(strong, nonatomic) NSMutableDictionary<NSString *, Feedback *> *feedbacks;
+@property(strong, nonatomic) NSMutableDictionary<NSNumber *, Feedback *> *feedbacks;
 
 @property(nonatomic, assign) LaunchState state;
 
@@ -96,6 +98,13 @@ NSString * const kPurchaseRestoredKey 		= @"purchase-restored";
 {
 	@synchronized (self) {
 		return [self _canMakePayments];
+	}
+}
+
+-(void)registerFeedback:(Feedback *)feedback forKey:(NSNumber *)key
+{
+	@synchronized (self) {
+		[_feedbacks setObject:feedback forKey:key];
 	}
 }
 
@@ -181,7 +190,7 @@ NSString * const kPurchaseRestoredKey 		= @"purchase-restored";
 	
 	[SKPAYMENTQUEUE finishTransaction:transaction];
 	
-	Feedback *feedback = [_feedbacks objectForKey:kPurchaseSucceededKey];
+	Feedback *feedback = [_feedbacks objectForKey:@(kFeedbackKey_PurchaseSucceeded)];
 	if (feedback != nil) {
 		[feedback respond:[BillingResponder buildPurchaseSucceededResponse:transaction]];
 	} else {
@@ -195,7 +204,7 @@ NSString * const kPurchaseRestoredKey 		= @"purchase-restored";
 	
 	[SKPAYMENTQUEUE finishTransaction:transaction];
 	
-	Feedback *feedback = [_feedbacks objectForKey:kPurchaseRestoredKey];
+	Feedback *feedback = [_feedbacks objectForKey:@(kFeedbackKey_PurchaseRestored)];
 	if (feedback != nil) {
 		[feedback respond:[BillingResponder buildPurchaseRestoredResponse:transaction]];
 	} else {
@@ -215,7 +224,7 @@ NSString * const kPurchaseRestoredKey 		= @"purchase-restored";
 		error = [NSError errorWithDomain:StarToolsErrorDomain code:-1 userInfo:nil];
 	}
 	
-	Feedback *feedback = [_feedbacks objectForKey:kPurchaseFailedKey];
+	Feedback *feedback = [_feedbacks objectForKey:@(kFeedbackKey_PurchaseFailed)];
 	if (feedback != nil) {
 		[feedback respond:[BillingResponder buildPurchaseFailedResponse:error]];
 	} else {
@@ -305,7 +314,7 @@ NSString * const kPurchaseRestoredKey 		= @"purchase-restored";
 		[_products removeObjectForKey:identifier];
 	}
 	
-	Feedback *feedback = [_feedbacks objectForKey:kLaunchSucceededKey];
+	Feedback *feedback = [_feedbacks objectForKey:@(kFeedbackKey_LaunchSucceeded)];
 	if (feedback != nil) {
 		[feedback respond:[BillingResponder buildLaunchSuccessResponse:_products]];
 	} else {
@@ -317,7 +326,7 @@ NSString * const kPurchaseRestoredKey 		= @"purchase-restored";
 
 -(void)request:(SKRequest *)request didFailWithError:(NSError *)error
 {
-	Feedback *feedback = [_feedbacks objectForKey:kLaunchFailedKey];
+	Feedback *feedback = [_feedbacks objectForKey:@(kFeedbackKey_LaunchFailed)];
 	if (feedback != nil) {
 		[feedback respond:[BillingResponder buildLaunchFailResponse:error]];
 	} else {
@@ -330,13 +339,6 @@ NSString * const kPurchaseRestoredKey 		= @"purchase-restored";
 -(void)requestDidFinish:(SKRequest *)request
 {
 	logmsg(@"[Billing] Billing launch finished.");
-}
-
-#pragma mark - Feedbacks
-
--(void)registerFeedback:(Feedback *)feedback forKey:(NSString *)key
-{
-	[_feedbacks setObject:feedback forKey:key];
 }
 
 @end

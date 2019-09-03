@@ -1,10 +1,10 @@
-package com.feosoftware.startools;
+package com.feosoftware.startools.core;
 
 import android.os.Handler;
 
 public final class Core {
     private static Handler _mainThreadHandler;
-    private static MessageCenterHandler _messageCenterHandler;
+    private static MessageCenter _messageCenter;
 
     /**
      * This method must be called from main thread.
@@ -12,8 +12,8 @@ public final class Core {
      * Thats why we create main thread handler.
      * @param messageCenterHandler Managed class relation.
      */
-    public static void RegisterMessageCenterHandler(MessageCenterHandler messageCenterHandler) {
-        _messageCenterHandler = messageCenterHandler;
+    public static void RegisterMessageCenterHandler(MessageCenter messageCenterHandler) {
+        _messageCenter = messageCenterHandler;
 
         if (_mainThreadHandler == null) {
             _mainThreadHandler = new Handler();
@@ -30,8 +30,8 @@ public final class Core {
         RunOnMainThread(new Runnable() {
             @Override
             public void run() {
-                if (_messageCenterHandler != null) {
-                    _messageCenterHandler.onMessage(message, data);
+                if (_messageCenter != null) {
+                    _messageCenter.onMessage(message, data);
                 }
             }
         });

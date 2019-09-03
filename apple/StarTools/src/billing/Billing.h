@@ -13,12 +13,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-extern NSString * const kLaunchSucceededKey;
-extern NSString * const kLaunchFailedKey;
-extern NSString * const kPurchaseSucceededKey;
-extern NSString * const kPurchaseFailedKey;
-extern NSString * const kPurchaseRestoredKey;
-
 @interface Billing : NSObject
 
 -(instancetype)init;
@@ -29,7 +23,7 @@ extern NSString * const kPurchaseRestoredKey;
 -(void)restorePurchases;
 -(BOOL)canMakePayments;
 
--(void)registerFeedback:(Feedback *)feedback forKey:(NSString *)key;
+-(void)registerFeedback:(Feedback *)feedback forKey:(NSNumber *)key;
 
 @end
 

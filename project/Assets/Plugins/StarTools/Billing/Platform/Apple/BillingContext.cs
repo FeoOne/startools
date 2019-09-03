@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using StarTools.Core;
 using StarTools.Core.Apple;
 
 namespace StarTools.Billing.Platform.Apple
@@ -7,7 +8,7 @@ namespace StarTools.Billing.Platform.Apple
 #if UNITY_IOS
     using Data;
     
-    public sealed class BillingContext : BillingFacade, IBillingContext
+    public sealed class BillingContext : BillingFacade, IFeedbacked
     {
         // main
         [DllImport("__Internal", CharSet = CharSet.Ansi)]
@@ -23,16 +24,8 @@ namespace StarTools.Billing.Platform.Apple
         
         // feedback registration
         [DllImport("__Internal")]
-        private static extern void StarTools_Billing_RegisterLaunchSucceededFeedback(IntPtr action);
-        [DllImport("__Internal")]
-        private static extern void StarTools_Billing_RegisterLaunchFailedFeedback(IntPtr action);
-        [DllImport("__Internal")]
-        private static extern void StarTools_Billing_RegisterPurchaseSucceededFeedback(IntPtr action);
-        [DllImport("__Internal")]
-        private static extern void StarTools_Billing_RegisterPurchaseRestoredFeedback(IntPtr action);
-        [DllImport("__Internal")]
-        private static extern void StarTools_Billing_RegisterPurchaseFailedFeedback(IntPtr action);
-        
+        private static extern void StarTools_Billing_RegisterFeedback(int key, IntPtr action);
+
         /**
          * Main
          */
@@ -63,32 +56,12 @@ namespace StarTools.Billing.Platform.Apple
         }
         
         /**
-         * IFeedbackedbilling
+         * IFeedbacked
          */
         
-        public void RegisterLaunchSucceededFeedback(Action<LaunchSucceeded> action)
+        public void RegisterFeedback<T>(int key, Action<T> action)
         {
-            StarTools_Billing_RegisterLaunchSucceededFeedback(Feedback.ActionToIntPtr(action));
-        }
-
-        public void RegisterLaunchFailedFeedback(Action<LaunchFailed> action)
-        {
-            StarTools_Billing_RegisterLaunchFailedFeedback(Feedback.ActionToIntPtr(action));
-        }
-
-        public void RegisterPurchaseSucceededFeedback(Action<PurchaseSucceeded> action)
-        {
-            StarTools_Billing_RegisterPurchaseSucceededFeedback(Feedback.ActionToIntPtr(action));
-        }
-        
-        public void RegisterPurchaseRestoredFeedback(Action<PurchaseRestored> action)
-        {
-            StarTools_Billing_RegisterPurchaseRestoredFeedback(Feedback.ActionToIntPtr(action));
-        }
-
-        public void RegisterPurchaseFailedFeedback(Action<PurchaseFailed> action)
-        {
-            StarTools_Billing_RegisterPurchaseFailedFeedback(Feedback.ActionToIntPtr(action));
+            StarTools_Billing_RegisterFeedback(key, Feedback.ActionToIntPtr(action));
         }
     }
 #endif
