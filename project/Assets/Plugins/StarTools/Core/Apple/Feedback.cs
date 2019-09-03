@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace StarTools.Core.Apple
 {
+#if UNITY_IOS && (STARTOOLS_DEBUG || !UNITY_EDITOR)
     public static class Feedback
     {
         private delegate void CallbackDelegate(IntPtr ptr, string data);
@@ -22,7 +23,7 @@ namespace StarTools.Core.Apple
             var action = IntPtrToObject(ptr, true);
             if (action == null)
             {
-                Debug.LogError("Missed callback.");
+                Debug.LogError("[Feedback] Missed callback.");
                 return;
             }
 
@@ -108,9 +109,8 @@ namespace StarTools.Core.Apple
         [RuntimeInitializeOnLoadMethod]
         private static void Setup()
         {
-            Debug.Log("StarTools.Core.Apple.Setup()");
-            
             StarTools_RegisterFeedbackDelegate(CallbackInvoke);
         }
     }
+#endif
 }

@@ -2,8 +2,6 @@ using System;
 
 namespace StarTools.Billing
 {
-    using Data;
-    
     public abstract class BillingFacade
     {
         public enum ProductType

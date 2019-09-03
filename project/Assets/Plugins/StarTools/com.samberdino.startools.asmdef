@@ -1,7 +1,12 @@
 {
-    "name": "StarTools",
+    "name": "com.samberdino.startools",
     "references": [],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Android",
+        "Editor",
+        "iOS",
+        "tvOS"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

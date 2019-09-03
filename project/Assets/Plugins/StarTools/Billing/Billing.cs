@@ -1,16 +1,18 @@
-using System;
 using UnityEngine;
-using StarTools.Event;
-using StarTools.Billing.Data;
-
-#if UNITY_IOS
-using StarTools.Billing.Platform.Apple;
-#elif UNITY_ANDROID
-using StarTools.Billing.Platform.Google;
-#endif
 
 namespace StarTools.Billing
 {
+    using Data;
+    using Event;
+    
+#if UNITY_IOS && (STARTOOLS_DEBUG || !UNITY_EDITOR)
+    using Platform.Apple;
+#elif UNITY_ANDROID && (STARTOOLS_DEBUG || !UNITY_EDITOR)
+    using Platform.Google;
+#else
+    using Platform.Stub;
+#endif
+    
     public class Billing : BillingFacade
     {
         private enum FeedbackKey {

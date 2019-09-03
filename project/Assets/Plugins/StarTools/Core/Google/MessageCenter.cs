@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace StarTools.Core.Google
 {
+#if UNITY_ANDROID && (STARTOOLS_DEBUG || !UNITY_EDITOR)
     public static class MessageCenter
     {
         private static Action<string, string> _onMessageManagedAction;
@@ -25,4 +26,5 @@ namespace StarTools.Core.Google
                 .CallStatic("RegisterMessageCenterHandler", new JavaMessageCenter());
         }
     }
+#endif
 }

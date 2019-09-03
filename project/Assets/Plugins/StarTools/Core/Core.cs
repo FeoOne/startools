@@ -9,10 +9,10 @@ namespace StarTools.Core
 		{
 			Debug.Log("StarTools.Core.Core.Setup()");
 			
-#if UNITY_IOS && (!STARTOOLS_DEBUG || !UNITY_EDITOR)
+#if UNITY_IOS && (STARTOOLS_DEBUG || !UNITY_EDITOR)
 			Apple.MessageCenter.Setup(OnMessage);
 #endif
-#if UNITY_ANDROID && (!STARTOOLS_DEBUG || !UNITY_EDITOR)
+#if UNITY_ANDROID && (STARTOOLS_DEBUG || !UNITY_EDITOR)
 			Google.MessageCenter.Setup(OnMessage);
 #endif
 		}

@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace StarTools.Core.Apple
 {
+#if UNITY_IOS && (STARTOOLS_DEBUG || !UNITY_EDITOR)
     public static class MessageCenter
     {
         private delegate void MessageDelegate(string message, string data);
@@ -25,4 +26,5 @@ namespace StarTools.Core.Apple
             StarTools_RegisterMessageCenterDelegate(OnMessage);
         }
     }
+#endif
 }

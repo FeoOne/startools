@@ -1,6 +1,0 @@
-framework module StarTools {
-  umbrella header "StarTools.h"
-
-  export *
-  module * { export * }
-}

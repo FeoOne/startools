@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace StarTools.Core.Google
 {
+#if UNITY_ANDROID && (STARTOOLS_DEBUG || !UNITY_EDITOR)
     public static class Feedback
     {
         private class FeedbackHandler<T> : AndroidJavaProxy
@@ -27,4 +28,5 @@ namespace StarTools.Core.Google
             return new FeedbackHandler<T>(action);
         }
     }
+#endif
 }

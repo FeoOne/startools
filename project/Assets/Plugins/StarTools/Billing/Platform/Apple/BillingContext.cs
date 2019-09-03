@@ -1,12 +1,11 @@
 using System;
 using System.Runtime.InteropServices;
 using StarTools.Core;
-using StarTools.Core.Apple;
 
 namespace StarTools.Billing.Platform.Apple
 {
-#if UNITY_IOS
-    using Data;
+#if UNITY_IOS && (STARTOOLS_DEBUG || !UNITY_EDITOR)
+    using Core.Apple;
     
     public sealed class BillingContext : BillingFacade, IFeedbacked
     {
@@ -27,7 +26,7 @@ namespace StarTools.Billing.Platform.Apple
         private static extern void StarTools_Billing_RegisterFeedback(int key, IntPtr action);
 
         /**
-         * Main
+         * BillingFacade
          */
         
         public override void RegisterProduct(string identifier, ProductType type)
