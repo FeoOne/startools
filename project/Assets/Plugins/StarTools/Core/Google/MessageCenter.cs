@@ -23,7 +23,7 @@ namespace StarTools.Core.Google
             _onMessageManagedAction = onMessage;
             
             new AndroidJavaClass("com.feosoftware.startools.core.Core")
-                .CallStatic("RegisterMessageCenterHandler", new JavaMessageCenter());
+                .CallStatic("registerMessageCenterHandler", new JavaMessageCenter());
         }
     }
 #endif

@@ -13,6 +13,7 @@ namespace StarTools.Core
 			Apple.MessageCenter.Setup(OnMessage);
 #endif
 #if UNITY_ANDROID && (STARTOOLS_DEBUG || !UNITY_EDITOR)
+			Google.Core.Setup();
 			Google.MessageCenter.Setup(OnMessage);
 #endif
 		}

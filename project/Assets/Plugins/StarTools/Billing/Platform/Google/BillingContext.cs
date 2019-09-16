@@ -37,7 +37,7 @@ namespace StarTools.Billing.Platform.Google
         
         public override void RestorePurchases()
         {
-            // todo: implement
+            _billing?.Call("restorePurchases");
         }
         
         public override bool CanMakePurchases()

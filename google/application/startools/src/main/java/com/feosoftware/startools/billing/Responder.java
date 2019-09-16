@@ -1,5 +1,8 @@
 package com.feosoftware.startools.billing;
 
+import android.support.annotation.Nullable;
+import android.util.Log;
+
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingResult;
 
@@ -10,6 +13,8 @@ import org.json.JSONObject;
 import java.util.Collection;
 
 final class Responder {
+    private static final String TAG = "BillingResponder";
+
     // shared
     private static final String CODE_KEY = "Code";
     private static final String MESSAGE_KEY = "Message";
@@ -27,56 +32,86 @@ final class Responder {
     // purchase failed
     private static final String ISCANCELLED_KEY = "IsCancelled";
 
-    static JSONObject buildLaunchSucceededResponse(Collection<Product> products) throws JSONException {
-        JSONArray array = new JSONArray();
+    static JSONObject buildLaunchSucceededResponse(@Nullable Collection<Product> products) {
+        JSONObject response = null;
 
-        for (Product product: products) {
-            if (product.getDetails() == null) {
-                continue;
+        try {
+            JSONArray array = new JSONArray();
+
+            if (products != null) {
+                for (Product product : products) {
+                    if (product.getDetails() == null) {
+                        continue;
+                    }
+
+                    JSONObject obj = new JSONObject();
+
+                    obj.put(IDENTIFIER_KEY, product.getIdentifier());
+                    obj.put(LOCALIZED_DESCRIPTION_KEY, product.getDetails().getDescription());
+                    obj.put(LOCALIZED_TITLE_KEY, product.getDetails().getTitle());
+                    obj.put(LOCALIZED_PRICE_KEY, product.getDetails().getOriginalPrice());
+                    obj.put(PRICE_KEY, (float) product.getDetails().getOriginalPriceAmountMicros() / 1000000.0f);
+
+                    array.put(obj);
+                }
             }
 
-            JSONObject obj = new JSONObject();
+            response = new JSONObject();
 
-            obj.put(IDENTIFIER_KEY, product.getIdentifier());
-            obj.put(LOCALIZED_DESCRIPTION_KEY, product.getDetails().getDescription());
-            obj.put(LOCALIZED_TITLE_KEY, product.getDetails().getTitle());
-            obj.put(LOCALIZED_PRICE_KEY, product.getDetails().getOriginalPrice());
-            obj.put(PRICE_KEY, (float)product.getDetails().getOriginalPriceAmountMicros() / 1000000.0f);
-
-            array.put(obj);
+            response.put(PRODUCTS_KEY, array);
+        }
+        catch (JSONException e) {
+            Log.e(TAG, "Can't buildLaunchSucceededResponse: " + e.getMessage());
         }
 
-        JSONObject response = new JSONObject();
+        return response;
+    }
 
-        response.put(PRODUCTS_KEY, array);
+    static JSONObject buildLaunchFailedResponse(BillingResult billingResult) {
+        JSONObject response = null;
+
+        try {
+            response = new JSONObject();
+
+            response.put(CODE_KEY, billingResult.getResponseCode());
+            response.put(MESSAGE_KEY, billingResult.getDebugMessage());
+        }
+        catch (JSONException e) {
+            Log.e(TAG, "Can't buildLaunchFailedResponse: " + e.getMessage());
+        }
 
         return response;
     }
 
-    static JSONObject buildLaunchFailedResponse(BillingResult billingResult) throws JSONException {
-        JSONObject response = new JSONObject();
+    static JSONObject buildPurchaseSucceededResponse(String identifier) {
+        JSONObject response = null;
 
-        response.put(CODE_KEY, billingResult.getResponseCode());
-        response.put(MESSAGE_KEY, billingResult.getDebugMessage());
+        try {
+            response = new JSONObject();
 
-        return response;
-    }
-
-    static JSONObject buildPurchaseSucceededResponse(String identifier) throws JSONException {
-        JSONObject response = new JSONObject();
-
-        response.put(IDENTIFIER_KEY, identifier);
+            response.put(IDENTIFIER_KEY, identifier);
+        }
+        catch (JSONException e) {
+            Log.e(TAG, "Can't buildPurchaseSucceededResponse: " + e.getMessage());
+        }
 
         return response;
     }
 
-    static JSONObject buildPurchaseFailedResponse(BillingResult billingResult) throws JSONException {
-        JSONObject response = new JSONObject();
+    static JSONObject buildPurchaseFailedResponse(BillingResult billingResult) {
+        JSONObject response = null;
 
-        response.put(CODE_KEY, billingResult.getResponseCode());
-        response.put(MESSAGE_KEY, billingResult.getDebugMessage());
-        response.put(ISCANCELLED_KEY,
-                billingResult.getResponseCode() == BillingClient.BillingResponseCode.USER_CANCELED);
+        try {
+            response = new JSONObject();
+
+            response.put(CODE_KEY, billingResult.getResponseCode());
+            response.put(MESSAGE_KEY, billingResult.getDebugMessage());
+            response.put(ISCANCELLED_KEY,
+                    billingResult.getResponseCode() == BillingClient.BillingResponseCode.USER_CANCELED);
+        }
+        catch (JSONException e) {
+            Log.e(TAG, "Can't buildPurchaseFailedResponse: " + e.getMessage());
+        }
 
         return response;
     }

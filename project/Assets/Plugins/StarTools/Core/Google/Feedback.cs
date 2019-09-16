@@ -14,8 +14,9 @@ namespace StarTools.Core.Google
             {
                 _action = action;
             }
-
-            public void OnResponse(AndroidJavaObject result)
+            
+            // ReSharper disable once InconsistentNaming
+            public void onResponse(AndroidJavaObject result)
             {
                 var json = result?.Call<string>("toString");
                 var obj = Newtonsoft.Json.JsonConvert.DeserializeObject<T>(json);

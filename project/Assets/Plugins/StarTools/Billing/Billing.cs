@@ -1,9 +1,16 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
+#if !STARTOOLS_DEBUG
+#   undef UNITY_ASSERTIONS
+#endif
+    
 namespace StarTools.Billing
 {
     using Data;
     using Event;
+    using Platform;
     
 #if UNITY_IOS && (STARTOOLS_DEBUG || !UNITY_EDITOR)
     using Platform.Apple;
@@ -27,11 +34,16 @@ namespace StarTools.Billing
 
         public static Billing Instance { get; private set; }
 
+        public IDictionary<string, Product> Products { get; } = new Dictionary<string, Product>();
+
         public readonly Stream<LaunchSucceeded> LaunchSucceededStream = new Stream<LaunchSucceeded>();
         public readonly Stream<LaunchFailed> LaunchFailedStream = new Stream<LaunchFailed>();
         public readonly Stream<PurchaseSucceeded> PurchaseSucceededStream = new Stream<PurchaseSucceeded>();
         public readonly Stream<PurchaseRestored> PurchaseRestoredStream = new Stream<PurchaseRestored>();
         public readonly Stream<PurchaseFailed> PurchaseFailedStream = new Stream<PurchaseFailed>();
+        
+        private IDisposable _launchSucceededHandle;
+        private IDisposable _launchFailedHandle;
 
         [RuntimeInitializeOnLoadMethod]
         private static void Setup()
@@ -40,6 +52,7 @@ namespace StarTools.Billing
             
             Instance = new Billing();
             Instance.RegisterFeedbacks();
+            Instance.ListenLaunchResult();
         }
         
         private Billing()
@@ -88,6 +101,25 @@ namespace StarTools.Billing
                 x => PurchaseRestoredStream.Send(x));
             _billing?.RegisterFeedback<PurchaseFailed>((int)FeedbackKey.PurchaseFailed, 
                 x => PurchaseFailedStream.Send(x));
+        }
+
+        private void ListenLaunchResult()
+        {
+            _launchSucceededHandle = Instance.LaunchSucceededStream.Listen(OnLaunchSucceeded);
+            _launchFailedHandle = Instance.LaunchFailedStream.Listen(OnLaunchFailed);
+        }
+
+        private void OnLaunchSucceeded(LaunchSucceeded response)
+        {
+            foreach (var metadata in response.Products)
+            {
+                Products.Add(metadata.Identifier, new Product(metadata));
+            }
+        }
+
+        private void OnLaunchFailed(LaunchFailed response)
+        {
+            // todo
         }
     }
 }

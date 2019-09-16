@@ -1,14 +1,21 @@
 package com.feosoftware.startools.billing;
 
+import android.app.Activity;
+import android.app.Application;
+import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
 import android.support.annotation.Nullable;
 
+import com.android.billingclient.api.AcknowledgePurchaseParams;
+import com.android.billingclient.api.AcknowledgePurchaseResponseListener;
 import com.android.billingclient.api.BillingClient;
 
 import java.util.AbstractMap;
+import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import com.android.billingclient.api.BillingClientStateListener;
@@ -17,13 +24,17 @@ import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ConsumeParams;
 import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.Purchase;
+import com.android.billingclient.api.PurchaseHistoryRecord;
+import com.android.billingclient.api.PurchaseHistoryResponseListener;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsParams;
 import com.android.billingclient.api.SkuDetailsResponseListener;
+import com.feosoftware.startools.core.Core;
+import com.feosoftware.startools.system.NetworkListener;
 import com.unity3d.player.UnityPlayer;
 
-import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.feosoftware.startools.core.Feedback;
 
@@ -31,7 +42,11 @@ public final class Billing implements
         PurchasesUpdatedListener,
         BillingClientStateListener,
         SkuDetailsResponseListener,
-        ConsumeResponseListener
+        ConsumeResponseListener,
+        AcknowledgePurchaseResponseListener,
+        PurchaseHistoryResponseListener,
+        Application.ActivityLifecycleCallbacks,
+        NetworkListener.Handler
 {
     private static final String TAG = "Billing";
 
@@ -51,6 +66,7 @@ public final class Billing implements
     private SparseArray<Feedback> _feedbacks;
     private AbstractMap<String, Product> _products;
     private AbstractMap<String, String> _pendingProducts;
+    private AbstractSet<String> _purchasedTokens;
 
     /**
      * Ctor
@@ -63,11 +79,16 @@ public final class Billing implements
         _feedbacks = new SparseArray<>(5);
         _products = new HashMap<>(32);
         _pendingProducts = new HashMap<>(4);
+        _purchasedTokens = new HashSet<>();
 
         _billingClient = BillingClient.newBuilder(UnityPlayer.currentActivity)
                 .enablePendingPurchases()
                 .setListener(this)
                 .build();
+
+        UnityPlayer.currentActivity.getApplication().registerActivityLifecycleCallbacks(this); // todo: refactor
+
+        NetworkListener.registerHandler(this);
 
         Log.i(TAG, "Billing initialized.");
     }
@@ -158,7 +179,17 @@ public final class Billing implements
                 .build();
         BillingResult billingResult = _billingClient.launchBillingFlow(UnityPlayer.currentActivity, params);
 
-        Log.i(TAG, "Billing flow result: " + billingResult.getResponseCode() + ".");
+        Log.i(TAG, "Billing flow launch result: " + billingResult.getResponseCode() + ".");
+    }
+
+    public void restorePurchases() {
+        synchronized (this) {
+            _restorePurchases();
+        }
+    }
+
+    private void _restorePurchases() {
+        _billingClient.queryPurchaseHistoryAsync(BillingClient.SkuType.INAPP, this);
     }
 
     /**
@@ -186,29 +217,114 @@ public final class Billing implements
     }
 
     private void onLaunchFailed(BillingResult billingResult) {
-        Feedback feedback = _feedbacks.get(LAUNCH_FAILED_FEEDBACK_KEY);
-        if (feedback != null) {
-            try {
-                feedback.onResponse(Responder.buildLaunchFailedResponse(billingResult));
-            }
-            catch (JSONException e) {
-                Log.e(TAG, "Can't respond: " + e.getMessage());
-            }
-        }
+        sendFeedback(LAUNCH_FAILED_FEEDBACK_KEY, Responder.buildLaunchFailedResponse(billingResult));
 
         _state = NOT_LAUNCHED_LAUNCH_STATE;
     }
 
+    private void onPurchaseSucceeded(String identifier) {
+        sendFeedback(PURCHASE_SUCCEEDED_FEEDBACK_KEY, Responder.buildPurchaseSucceededResponse(identifier));
+    }
+
     private void onPurchaseFailed(BillingResult billingResult) {
-        Feedback feedback = _feedbacks.get(PURCHASE_FAILED_FEEDBACK_KEY);
-        if (feedback != null) {
-            try {
-                feedback.onResponse(Responder.buildPurchaseFailedResponse(billingResult));
+        sendFeedback(PURCHASE_FAILED_FEEDBACK_KEY, Responder.buildPurchaseFailedResponse(billingResult));
+    }
+
+    private void handlePurchase(Purchase purchase) {
+        Log.i(TAG, "Handling purchase for '"
+                + purchase.getSku() + "' with state '"
+                + purchase.getPurchaseState() + "'.");
+
+        switch (purchase.getPurchaseState()) {
+            case Purchase.PurchaseState.PURCHASED: {
+                Product product = _products.get(purchase.getSku());
+                if (product != null) {
+                    switch (product.getType()) {
+                        case Product.CONSUMABLE_TYPE: {
+                            consumePurchase(purchase);
+                            break;
+                        }
+                        case Product.NONCONSUMABLE_TYPE: {
+                            if (!purchase.isAcknowledged()) {
+                                acknowledgePurchase(purchase);
+                            }
+                            break;
+                        }
+                        default: {
+                            Log.e(TAG, "Not implemented.");
+                            // todo: implement
+                        }
+                    }
+                } else {
+                    Log.e(TAG, "Fatal error: purchasing product not presented.");
+                    // todo: maybe we need notify client for unlock interface
+                }
+
+                break;
             }
-            catch (JSONException e) {
-                Log.e(TAG, "Can't respond: " + e.getMessage());
+            case Purchase.PurchaseState.PENDING: {
+                Log.i(TAG, "Pending purchase.");
+                // todo: maybe we need notify client for unlock interface
+
+                break;
+            }
+            case Purchase.PurchaseState.UNSPECIFIED_STATE: {
+                Log.e(TAG, "UNSPECIFIED_STATE purchase state.");
+                // todo: maybe we need notify client for unlock interface
+
+                break;
             }
         }
+    }
+
+    private void consumePurchase(Purchase purchase) {
+        Log.i(TAG, "Consuming purchase " + purchase.getSku());
+
+        _pendingProducts.put(purchase.getPurchaseToken(), purchase.getSku());
+
+        ConsumeParams params = ConsumeParams.newBuilder()
+                .setPurchaseToken(purchase.getPurchaseToken())
+                .build();
+        _billingClient.consumeAsync(params, this);
+    }
+
+    private void acknowledgePurchase(Purchase purchase) {
+        AcknowledgePurchaseParams params = AcknowledgePurchaseParams.newBuilder()
+                .setPurchaseToken(purchase.getPurchaseToken())
+                .build();
+        _billingClient.acknowledgePurchase(params, this);
+
+        onPurchaseSucceeded(purchase.getSku());
+    }
+
+    private void sendFeedback(final int key, @Nullable final JSONObject response) {
+        Core.runOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+                Feedback feedback = _feedbacks.get(key);
+                if (feedback != null) {
+                    feedback.onResponse(response);
+                }
+            }
+        });
+    }
+
+    private void queryPurchases() {
+        Log.i(TAG, "Querying purchases.");
+
+        Purchase.PurchasesResult queryPurchasesResult = _billingClient.queryPurchases(BillingClient.SkuType.INAPP);
+        Log.i(TAG, "Querying purchases result: " + queryPurchasesResult.getResponseCode());
+
+        List<Purchase> purchases = queryPurchasesResult.getPurchasesList();
+        if (purchases != null) {
+            for (Purchase purchase: purchases) {
+                if (!_purchasedTokens.contains(purchase.getPurchaseToken())) { // todo: not working - fix
+                    handlePurchase(purchase);
+                }
+            }
+        }
+
+        // todo: SkuType.SUBS
     }
 
     /**
@@ -217,28 +333,28 @@ public final class Billing implements
 
     @Override
     public void onPurchasesUpdated(BillingResult billingResult, @Nullable List<Purchase> purchases) {
-        if (billingResult.getResponseCode() != BillingClient.BillingResponseCode.OK) {
-            onPurchaseFailed(billingResult);
-
-            return;
-        }
-
-        if (purchases != null) {
-            for (Purchase purchase: purchases) {
-                Log.i(TAG, "Handling purchase for '" + purchase.getSku() + "' with state '" + purchase.getPurchaseState() + "'.");
-
-                if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED) {
-                    _pendingProducts.put(purchase.getPurchaseToken(), purchase.getSku());
-
-                    ConsumeParams params = ConsumeParams.newBuilder()
-                            .setPurchaseToken(purchase.getPurchaseToken())
-                            .build();
-                    _billingClient.consumeAsync(params, this);
+        switch (billingResult.getResponseCode()) {
+            case BillingClient.BillingResponseCode.OK:
+            case BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED: {
+                if (purchases != null) {
+                    for (Purchase purchase: purchases) {
+                        handlePurchase(purchase);
+                    }
+                } else {
+                    Log.e(TAG, "OnPurchasesUpdated: Internal error (purchases = null).");
+                    onPurchaseFailed(billingResult);
                 }
+                break;
             }
-        } else {
-            Log.w(TAG, "OnPurchasesUpdated internal error: purchases = null.");
+            default: {
+                Log.e(TAG, "OnPurchasesUpdated: Purchase failed: " + billingResult.getResponseCode());
+                onPurchaseFailed(billingResult);
+            }
         }
+
+
+        // todo: ALREADY_OWNED - query purchases?
+        // todo: internet interruption
     }
 
     /**
@@ -277,8 +393,12 @@ public final class Billing implements
             return;
         }
 
+        Log.i(TAG, "Products queried succeeesfully.");
+
         // fill products
         if (skuDetailsList != null) {
+            Log.i(TAG, "Queried product count: " + skuDetailsList.size());
+
             for (SkuDetails details: skuDetailsList) {
                 Product product = _products.get(details.getSku());
                 if (product != null) {
@@ -288,17 +408,13 @@ public final class Billing implements
         }
 
         // respond
-        Feedback feedback = _feedbacks.get(LAUNCH_SUCCEEDED_FEEDBACK_KEY);
-        if (feedback != null) {
-            try {
-                feedback.onResponse(Responder.buildLaunchSucceededResponse(_products.values()));
-            }
-            catch (JSONException e) {
-                Log.e(TAG, "Can't respond: " + e.getMessage());
-            }
-        }
+        sendFeedback(LAUNCH_SUCCEEDED_FEEDBACK_KEY, Responder.buildLaunchSucceededResponse(_products.values()));
 
         _state = LAUNCHED_LAUNCH_STATE;
+
+        Log.i(TAG, "Billing launched.");
+
+        queryPurchases();
     }
 
     /**
@@ -310,7 +426,7 @@ public final class Billing implements
         String identifier = _pendingProducts.get(purchaseToken);
 
         if (billingResult.getResponseCode() != BillingClient.BillingResponseCode.OK) {
-            Log.e(TAG, "Purchase failed.");
+            Log.e(TAG, "[onConsumeResponse] Purchase failed: " + billingResult.getResponseCode());
 
             onPurchaseFailed(billingResult);
 
@@ -321,8 +437,11 @@ public final class Billing implements
             return;
         }
 
+        Log.i(TAG, "[onConsumeResponse] Consuming purchase " + identifier);
+
         if (identifier == null) {
-            Log.e(TAG, "Identifier not presented but purchases succeeded. Token '" + purchaseToken + "'.");
+            Log.e(TAG, "[onConsumeResponse] Identifier not presented but purchases succeeded. Token '"
+                    + purchaseToken + "'.");
 
             onPurchaseFailed(billingResult);
 
@@ -330,15 +449,79 @@ public final class Billing implements
         }
 
         _pendingProducts.remove(identifier);
+        _purchasedTokens.add(purchaseToken);
 
-        Feedback feedback = _feedbacks.get(PURCHASE_SUCCEEDED_FEEDBACK_KEY);
-        if (feedback != null) {
-            try {
-                feedback.onResponse(Responder.buildPurchaseSucceededResponse(identifier));
+        onPurchaseSucceeded(identifier);
+    }
+
+    /**
+     * AcknowledgePurchaseResponseListener overrides
+     */
+
+    @Override
+    public void onAcknowledgePurchaseResponse(BillingResult billingResult) {
+        Log.i(TAG, "Purchase acknowledgement result: " + billingResult.getResponseCode() + ".");
+    }
+
+    /**
+     * PurchaseHistoryResponseListener overrides
+     */
+
+    @Override
+    public void onPurchaseHistoryResponse(BillingResult billingResult,
+                                          List<PurchaseHistoryRecord> purchaseHistoryRecordList) {
+        if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+            if (purchaseHistoryRecordList != null) {
+                for (PurchaseHistoryRecord record: purchaseHistoryRecordList) {
+                    Log.i(TAG, "PurchaseHistoryRecord: " + record.getSku());
+//                    record
+                    // todo: onPurchaseSucceeded?
+                }
             }
-            catch (JSONException e) {
-                Log.e(TAG, "Can't respond: " + e.getMessage());
-            }
+        } else {
+            Log.e(TAG, "Purchase history response error: " + billingResult.getResponseCode() + ".");
+        }
+    }
+
+    /**
+     * Application.ActivityLifecycleCallbacks
+     */
+
+    @Override
+    public void onActivityCreated(Activity activity, Bundle savedInstanceState) { }
+
+    @Override
+    public void onActivityDestroyed(Activity activity) { }
+
+    @Override
+    public void onActivitySaveInstanceState(Activity activity, Bundle outState) { }
+
+    @Override
+    public void onActivityStarted(Activity activity) { }
+
+    @Override
+    public void onActivityStopped(Activity activity) { }
+
+    @Override
+    public void onActivityPaused(Activity activity) { }
+
+    @Override
+    public void onActivityResumed(Activity activity) {
+        if (activity == UnityPlayer.currentActivity) {
+            Log.i(TAG, "onActivityResumed");
+
+            queryPurchases();
+        }
+    }
+
+    /**
+     * NetworkListener.Handler
+     */
+
+    @Override
+    public void onStateChanged(boolean isConnected) {
+        if (isConnected) {
+            queryPurchases();
         }
     }
 }
