@@ -14,6 +14,8 @@
 		BDB16CBE23141BC200931E04 /* Feedback.m in Sources */ = {isa = PBXBuildFile; fileRef = BDB16CBC23141BC200931E04 /* Feedback.m */; };
 		BDC3A30923052D23002E249A /* Core.h in Headers */ = {isa = PBXBuildFile; fileRef = BDC3A30723052D23002E249A /* Core.h */; };
 		BDC3A30A23052D23002E249A /* Core.m in Sources */ = {isa = PBXBuildFile; fileRef = BDC3A30823052D23002E249A /* Core.m */; };
+		BDC692352375707700A473B0 /* FeedbackHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = BDC692332375707700A473B0 /* FeedbackHelper.h */; };
+		BDC692362375707700A473B0 /* FeedbackHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = BDC692342375707700A473B0 /* FeedbackHelper.m */; };
 		BDEEA120231CE95D003B46AF /* Product.h in Headers */ = {isa = PBXBuildFile; fileRef = BDEEA11E231CE95D003B46AF /* Product.h */; };
 		BDEEA121231CE95D003B46AF /* Product.m in Sources */ = {isa = PBXBuildFile; fileRef = BDEEA11F231CE95D003B46AF /* Product.m */; };
 		BDEEA124231CEC00003B46AF /* BillingResponder.h in Headers */ = {isa = PBXBuildFile; fileRef = BDEEA122231CEC00003B46AF /* BillingResponder.h */; };
@@ -33,6 +35,8 @@
 		BDB16CBC23141BC200931E04 /* Feedback.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Feedback.m; sourceTree = "<group>"; };
 		BDC3A30723052D23002E249A /* Core.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Core.h; sourceTree = "<group>"; };
 		BDC3A30823052D23002E249A /* Core.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Core.m; sourceTree = "<group>"; };
+		BDC692332375707700A473B0 /* FeedbackHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FeedbackHelper.h; sourceTree = "<group>"; };
+		BDC692342375707700A473B0 /* FeedbackHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FeedbackHelper.m; sourceTree = "<group>"; };
 		BDEEA11E231CE95D003B46AF /* Product.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Product.h; sourceTree = "<group>"; };
 		BDEEA11F231CE95D003B46AF /* Product.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Product.m; sourceTree = "<group>"; };
 		BDEEA122231CEC00003B46AF /* BillingResponder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BillingResponder.h; sourceTree = "<group>"; };
@@ -94,6 +98,8 @@
 				BDC3A30823052D23002E249A /* Core.m */,
 				BDB16CBB23141BC200931E04 /* Feedback.h */,
 				BDB16CBC23141BC200931E04 /* Feedback.m */,
+				BDC692332375707700A473B0 /* FeedbackHelper.h */,
+				BDC692342375707700A473B0 /* FeedbackHelper.m */,
 			);
 			path = core;
 			sourceTree = "<group>";
@@ -119,6 +125,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BDC3A30923052D23002E249A /* Core.h in Headers */,
+				BDC692352375707700A473B0 /* FeedbackHelper.h in Headers */,
 				BDEEA120231CE95D003B46AF /* Product.h in Headers */,
 				BDEEA128231D4F8F003B46AF /* Facade.h in Headers */,
 				BDB16CBD23141BC200931E04 /* Feedback.h in Headers */,
@@ -196,6 +203,7 @@
 			files = (
 				BDC3A30A23052D23002E249A /* Core.m in Sources */,
 				BDEEA121231CE95D003B46AF /* Product.m in Sources */,
+				BDC692362375707700A473B0 /* FeedbackHelper.m in Sources */,
 				BDB16CAE2313F4BB00931E04 /* Facade.m in Sources */,
 				BDB16CBE23141BC200931E04 /* Feedback.m in Sources */,
 				BDEEA125231CEC00003B46AF /* BillingResponder.m in Sources */,
@@ -329,6 +337,7 @@
 		BD222B5B23027B3F0099F193 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = NO;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
@@ -354,6 +363,7 @@
 		BD222B5C23027B3F0099F193 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = NO;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;

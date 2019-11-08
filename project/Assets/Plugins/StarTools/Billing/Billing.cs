@@ -1,11 +1,12 @@
-using System;
-using System.Collections.Generic;
-using UnityEngine;
-
 #if !STARTOOLS_DEBUG
 #   undef UNITY_ASSERTIONS
 #endif
-    
+
+using System;
+using System.Collections.Generic;
+using StarTools.Core;
+using UnityEngine;
+
 namespace StarTools.Billing
 {
     using Data;
@@ -22,14 +23,6 @@ namespace StarTools.Billing
     
     public class Billing : BillingFacade
     {
-        private enum FeedbackKey {
-            LaunchSucceeded = 0,
-            LaunchFailed = 1,
-            PurchaseSucceeded = 2,
-            PurchaseRestored = 3,
-            PurchaseFailed = 4,
-        };
-        
         private static BillingContext _billing;
 
         public static Billing Instance { get; private set; }
@@ -91,22 +84,22 @@ namespace StarTools.Billing
 
         private void RegisterFeedbacks()
         {
-            _billing?.RegisterFeedback<LaunchSucceeded>((int)FeedbackKey.LaunchSucceeded, 
+            FeedbackHelper.RegisterFeedback<LaunchSucceeded>((int)FeedbackHelper.Key.LaunchSucceeded, 
                 x => LaunchSucceededStream.Send(x));
-            _billing?.RegisterFeedback<LaunchFailed>((int)FeedbackKey.LaunchFailed, 
+            FeedbackHelper.RegisterFeedback<LaunchFailed>((int)FeedbackHelper.Key.LaunchFailed, 
                 x => LaunchFailedStream.Send(x));
-            _billing?.RegisterFeedback<PurchaseSucceeded>((int)FeedbackKey.PurchaseSucceeded, 
+            FeedbackHelper.RegisterFeedback<PurchaseSucceeded>((int)FeedbackHelper.Key.PurchaseSucceeded, 
                 x => PurchaseSucceededStream.Send(x));
-            _billing?.RegisterFeedback<PurchaseRestored>((int)FeedbackKey.PurchaseRestored, 
+            FeedbackHelper.RegisterFeedback<PurchaseRestored>((int)FeedbackHelper.Key.PurchaseRestored, 
                 x => PurchaseRestoredStream.Send(x));
-            _billing?.RegisterFeedback<PurchaseFailed>((int)FeedbackKey.PurchaseFailed, 
+            FeedbackHelper.RegisterFeedback<PurchaseFailed>((int)FeedbackHelper.Key.PurchaseFailed, 
                 x => PurchaseFailedStream.Send(x));
         }
 
         private void ListenLaunchResult()
         {
-            _launchSucceededHandle = Instance.LaunchSucceededStream.Listen(OnLaunchSucceeded);
-            _launchFailedHandle = Instance.LaunchFailedStream.Listen(OnLaunchFailed);
+            _launchSucceededHandle = LaunchSucceededStream.Listen(OnLaunchSucceeded);
+            _launchFailedHandle = LaunchFailedStream.Listen(OnLaunchFailed);
         }
 
         private void OnLaunchSucceeded(LaunchSucceeded response)

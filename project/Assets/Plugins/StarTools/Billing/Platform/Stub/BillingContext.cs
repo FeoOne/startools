@@ -4,7 +4,7 @@ using StarTools.Core;
 
 namespace StarTools.Billing.Platform.Stub
 {
-    public sealed class BillingContext : BillingFacade, IFeedbacked
+    public sealed class BillingContext : BillingFacade
     {
         /**
          * BillingFacade

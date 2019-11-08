@@ -25,6 +25,7 @@ static const NSString * const kProductLocalizedDescriptionKey = @"LocalizedDescr
 static const NSString * const kProductLocalizedTitleKey = @"LocalizedTitle";
 static const NSString * const kProductLocalizedPriceKey = @"LocalizedPrice";
 static const NSString * const kProductPriceKey = @"Price";
+static const NSString * const kProductCurrencyCodeKey = @"CurrencyCode";
 
 @implementation BillingResponder
 
@@ -45,6 +46,7 @@ static const NSString * const kProductPriceKey = @"Price";
 							 kProductLocalizedDescriptionKey: product.localizedDescription,
 							 kProductLocalizedTitleKey: product.localizedTitle,
 							 kProductLocalizedPriceKey: localizedPrice,
+							 kProductCurrencyCodeKey: [product.priceLocale objectForKey:NSLocaleCurrencyCode],
 							 kProductPriceKey: @(price)
 							 }];
 	}

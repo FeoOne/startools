@@ -9,8 +9,6 @@
 #import <Foundation/Foundation.h>
 #import <StoreKit/StoreKit.h>
 
-#import "Feedback.h"
-
 NS_ASSUME_NONNULL_BEGIN
 
 @interface Billing : NSObject

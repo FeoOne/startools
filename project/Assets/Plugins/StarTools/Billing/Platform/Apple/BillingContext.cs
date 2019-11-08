@@ -7,7 +7,7 @@ namespace StarTools.Billing.Platform.Apple
 #if UNITY_IOS && (STARTOOLS_DEBUG || !UNITY_EDITOR)
     using Core.Apple;
     
-    public sealed class BillingContext : BillingFacade, IFeedbacked
+    public sealed class BillingContext : BillingFacade
     {
         // main
         [DllImport("__Internal", CharSet = CharSet.Ansi)]
@@ -20,10 +20,6 @@ namespace StarTools.Billing.Platform.Apple
         private static extern void StarTools_Billing_RestorePurchases();
         [DllImport("__Internal")]
         private static extern bool StarTools_Billing_CanMakePurchases();
-        
-        // feedback registration
-        [DllImport("__Internal")]
-        private static extern void StarTools_Billing_RegisterFeedback(int key, IntPtr action);
 
         /**
          * BillingFacade
@@ -52,15 +48,6 @@ namespace StarTools.Billing.Platform.Apple
         public override bool CanMakePurchases()
         {
             return StarTools_Billing_CanMakePurchases();
-        }
-        
-        /**
-         * IFeedbacked
-         */
-        
-        public void RegisterFeedback<T>(int key, Action<T> action)
-        {
-            StarTools_Billing_RegisterFeedback(key, Feedback.ActionToIntPtr(action));
         }
     }
 #endif

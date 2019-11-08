@@ -1,7 +1,7 @@
 package com.feosoftware.startools.billing;
 
-import android.support.annotation.Nullable;
 import android.util.Log;
+import android.support.annotation.Nullable;
 
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingResult;
@@ -24,6 +24,7 @@ final class Responder {
     private static final String LOCALIZED_DESCRIPTION_KEY = "LocalizedDescription";
     private static final String LOCALIZED_TITLE_KEY = "LocalizedTitle";
     private static final String LOCALIZED_PRICE_KEY = "LocalizedPrice";
+    private static final String CURRENCY_CODE_KEY = "CurrencyCode";
     private static final String PRICE_KEY = "Price";
 
     // launch success
@@ -50,6 +51,7 @@ final class Responder {
                     obj.put(LOCALIZED_DESCRIPTION_KEY, product.getDetails().getDescription());
                     obj.put(LOCALIZED_TITLE_KEY, product.getDetails().getTitle());
                     obj.put(LOCALIZED_PRICE_KEY, product.getDetails().getOriginalPrice());
+                    obj.put(CURRENCY_CODE_KEY, product.getDetails().getPriceCurrencyCode());
                     obj.put(PRICE_KEY, (float) product.getDetails().getOriginalPriceAmountMicros() / 1000000.0f);
 
                     array.put(obj);

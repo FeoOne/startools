@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.SparseArray;
 import android.support.annotation.Nullable;
 
 import com.android.billingclient.api.AcknowledgePurchaseParams;
@@ -30,13 +29,11 @@ import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsParams;
 import com.android.billingclient.api.SkuDetailsResponseListener;
-import com.feosoftware.startools.core.Core;
+
+import com.feosoftware.startools.core.FeedbackHelper;
 import com.feosoftware.startools.system.NetworkListener;
+
 import com.unity3d.player.UnityPlayer;
-
-import org.json.JSONObject;
-
-import com.feosoftware.startools.core.Feedback;
 
 public final class Billing implements
         PurchasesUpdatedListener,
@@ -54,16 +51,11 @@ public final class Billing implements
     private static final int LAUNCHING_LAUNCH_STATE = 1;
     private static final int LAUNCHED_LAUNCH_STATE = 2;
 
-    private static final int LAUNCH_SUCCEEDED_FEEDBACK_KEY = 0;
-    private static final int LAUNCH_FAILED_FEEDBACK_KEY = 1;
-    private static final int PURCHASE_SUCCEEDED_FEEDBACK_KEY = 2;
-    private static final int PURCHASE_RESTORED_FEEDBACK_KEY = 3;
-    private static final int PURCHASE_FAILED_FEEDBACK_KEY = 4;
+
 
     private BillingClient _billingClient;
 
     private int _state;
-    private SparseArray<Feedback> _feedbacks;
     private AbstractMap<String, Product> _products;
     private AbstractMap<String, String> _pendingProducts;
     private AbstractSet<String> _purchasedTokens;
@@ -76,7 +68,6 @@ public final class Billing implements
     {
         _state = NOT_LAUNCHED_LAUNCH_STATE;
 
-        _feedbacks = new SparseArray<>(5);
         _products = new HashMap<>(32);
         _pendingProducts = new HashMap<>(4);
         _purchasedTokens = new HashSet<>();
@@ -91,20 +82,6 @@ public final class Billing implements
         NetworkListener.registerHandler(this);
 
         Log.i(TAG, "Billing initialized.");
-    }
-
-    /**
-     * Feedback
-     */
-
-    public void registerFeedback(int key, Feedback feedback) {
-        synchronized (this) {
-            _registerFeedback(key, feedback);
-        }
-    }
-
-    private void _registerFeedback(int key, Feedback feedback) {
-        _feedbacks.put(key, feedback);
     }
 
     /**
@@ -217,17 +194,20 @@ public final class Billing implements
     }
 
     private void onLaunchFailed(BillingResult billingResult) {
-        sendFeedback(LAUNCH_FAILED_FEEDBACK_KEY, Responder.buildLaunchFailedResponse(billingResult));
+        FeedbackHelper.sendFeedback(FeedbackHelper.LAUNCH_FAILED_KEY,
+                Responder.buildLaunchFailedResponse(billingResult));
 
         _state = NOT_LAUNCHED_LAUNCH_STATE;
     }
 
     private void onPurchaseSucceeded(String identifier) {
-        sendFeedback(PURCHASE_SUCCEEDED_FEEDBACK_KEY, Responder.buildPurchaseSucceededResponse(identifier));
+        FeedbackHelper.sendFeedback(FeedbackHelper.PURCHASE_SUCCEEDED_KEY,
+                Responder.buildPurchaseSucceededResponse(identifier));
     }
 
     private void onPurchaseFailed(BillingResult billingResult) {
-        sendFeedback(PURCHASE_FAILED_FEEDBACK_KEY, Responder.buildPurchaseFailedResponse(billingResult));
+        FeedbackHelper.sendFeedback(FeedbackHelper.PURCHASE_FAILED_KEY,
+                Responder.buildPurchaseFailedResponse(billingResult));
     }
 
     private void handlePurchase(Purchase purchase) {
@@ -295,18 +275,6 @@ public final class Billing implements
         _billingClient.acknowledgePurchase(params, this);
 
         onPurchaseSucceeded(purchase.getSku());
-    }
-
-    private void sendFeedback(final int key, @Nullable final JSONObject response) {
-        Core.runOnMainThread(new Runnable() {
-            @Override
-            public void run() {
-                Feedback feedback = _feedbacks.get(key);
-                if (feedback != null) {
-                    feedback.onResponse(response);
-                }
-            }
-        });
     }
 
     private void queryPurchases() {
@@ -386,7 +354,7 @@ public final class Billing implements
     @Override
     public void onSkuDetailsResponse(BillingResult billingResult, List<SkuDetails> skuDetailsList) {
         if (billingResult.getResponseCode() != BillingClient.BillingResponseCode.OK) {
-            Log.e(TAG, "Failed to querying products.");
+            Log.e(TAG, "Failed to querying products (" + billingResult.getResponseCode() + ").");
 
             onLaunchFailed(billingResult);
 
@@ -408,7 +376,8 @@ public final class Billing implements
         }
 
         // respond
-        sendFeedback(LAUNCH_SUCCEEDED_FEEDBACK_KEY, Responder.buildLaunchSucceededResponse(_products.values()));
+        FeedbackHelper.sendFeedback(FeedbackHelper.LAUNCH_SUCCEEDED_KEY,
+                Responder.buildLaunchSucceededResponse(_products.values()));
 
         _state = LAUNCHED_LAUNCH_STATE;
 
@@ -510,7 +479,9 @@ public final class Billing implements
         if (activity == UnityPlayer.currentActivity) {
             Log.i(TAG, "onActivityResumed");
 
-            queryPurchases();
+            if (_state == LAUNCHED_LAUNCH_STATE) {
+                queryPurchases();
+            }
         }
     }
 
@@ -520,7 +491,7 @@ public final class Billing implements
 
     @Override
     public void onStateChanged(boolean isConnected) {
-        if (isConnected) {
+        if (isConnected && _state == LAUNCHED_LAUNCH_STATE) {
             queryPurchases();
         }
     }

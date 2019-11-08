@@ -32,7 +32,7 @@
 -(void)respond:(NSDictionary *)params
 {
 	if (_action == NULL) {
-		logmsg(@"[Feedback] Can't respond with NULL action.");
+		logmsg(@"[StarTools] [Feedback] Can't respond with NULL action.");
 		return;
 	}
 	
@@ -44,7 +44,7 @@
 		if (error == nil) {
 			json = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 		} else {
-			logmsg(@"Can't respond. JSON serialization error: %@", error.localizedDescription);
+			logmsg(@"[StarTools] [Feedback] Can't respond. JSON serialization error: %@", error.localizedDescription);
 		}
 	}
 	
@@ -53,6 +53,8 @@
 		DEF_STRONG_SELF;
 		if ([Feedback getFeedbackDelegate] != NULL) {
 			[Feedback getFeedbackDelegate](strongSelf.action, (json != nil) ? [json cStringUsingEncoding:NSUTF8StringEncoding] : NULL);
+		} else {
+			logmsg(@"[StarTools] [Feedback] Can't respond. Feedback delegate is NULL.");
 		}
 	});
 }

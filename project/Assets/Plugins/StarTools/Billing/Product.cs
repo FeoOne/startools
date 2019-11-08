@@ -1,9 +1,9 @@
-using StarTools.Billing.Data;
-using UnityEngine;
-
 #if !STARTOOLS_DEBUG
 #   undef UNITY_ASSERTIONS
 #endif
+
+using StarTools.Billing.Data;
+using UnityEngine;
 
 namespace StarTools.Billing.Platform
 {
@@ -14,7 +14,10 @@ namespace StarTools.Billing.Platform
         public string Identifier => _metadata.Identifier;
         public string Description => _metadata.LocalizedDescription;
         public string Title => _metadata.LocalizedTitle;
-        public string Price => _metadata.LocalizedPrice;
+        public string LocalizedPrice => _metadata.LocalizedPrice;
+        public string CurrencyCode => _metadata.CurrencyCode;
+        public float Price => _metadata.Price;
+        
         
         public Product(ProductMetadata metadata)
         {

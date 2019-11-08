@@ -13,6 +13,7 @@ import android.net.NetworkInfo;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
 
+import com.feosoftware.startools.core.FeedbackHelper;
 import com.unity3d.player.UnityPlayer;
 
 import java.util.LinkedList;
@@ -91,12 +92,15 @@ public final class NetworkListener extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        boolean flag = isConnected(context);
+        boolean connected = isConnected(context);
 
-        Log.i(TAG, "State changed: " + flag);
+        Log.i(TAG, "State changed: " + connected);
 
         for (Handler handler: _handlers) {
-            handler.onStateChanged(flag);
+            handler.onStateChanged(connected);
         }
+
+        FeedbackHelper.sendFeedback(FeedbackHelper.NETWORK_STATE_CHANGED_KEY,
+                Responder.buildNetworkStateChangedResponse(connected));
     }
 }
