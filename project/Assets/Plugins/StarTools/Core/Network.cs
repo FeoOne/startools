@@ -8,7 +8,7 @@ namespace StarTools.Core
     {
         public static Network Instance { get; private set; }
         
-        public readonly Stream<LaunchSucceeded> NetworkStateChangedStream = new Stream<LaunchSucceeded>();
+        public readonly Stream<NetworkStateChanged> NetworkStateChangedStream = new Stream<NetworkStateChanged>();
         
         [RuntimeInitializeOnLoadMethod]
         private static void Setup()
@@ -19,7 +19,7 @@ namespace StarTools.Core
 
         private void RegisterFeedbacks()
         {
-            FeedbackHelper.RegisterFeedback<LaunchSucceeded>((int) FeedbackHelper.Key.NetworkStateChanged,
+            FeedbackHelper.RegisterFeedback<NetworkStateChanged>((int) FeedbackHelper.Key.NetworkStateChanged,
                 x => NetworkStateChangedStream.Send(x));
         }
     }
