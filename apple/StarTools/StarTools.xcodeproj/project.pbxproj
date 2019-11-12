@@ -16,10 +16,14 @@
 		BDC3A30A23052D23002E249A /* Core.m in Sources */ = {isa = PBXBuildFile; fileRef = BDC3A30823052D23002E249A /* Core.m */; };
 		BDC692352375707700A473B0 /* FeedbackHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = BDC692332375707700A473B0 /* FeedbackHelper.h */; };
 		BDC692362375707700A473B0 /* FeedbackHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = BDC692342375707700A473B0 /* FeedbackHelper.m */; };
+		BDC6923923758D6F00A473B0 /* Network.h in Headers */ = {isa = PBXBuildFile; fileRef = BDC6923723758D6F00A473B0 /* Network.h */; };
+		BDC6923A23758D6F00A473B0 /* Network.m in Sources */ = {isa = PBXBuildFile; fileRef = BDC6923823758D6F00A473B0 /* Network.m */; };
+		BDC6923D237595C800A473B0 /* ApplicationStateListener.h in Headers */ = {isa = PBXBuildFile; fileRef = BDC6923B237595C800A473B0 /* ApplicationStateListener.h */; };
+		BDC6923E237595C800A473B0 /* ApplicationStateListener.m in Sources */ = {isa = PBXBuildFile; fileRef = BDC6923C237595C800A473B0 /* ApplicationStateListener.m */; };
 		BDEEA120231CE95D003B46AF /* Product.h in Headers */ = {isa = PBXBuildFile; fileRef = BDEEA11E231CE95D003B46AF /* Product.h */; };
 		BDEEA121231CE95D003B46AF /* Product.m in Sources */ = {isa = PBXBuildFile; fileRef = BDEEA11F231CE95D003B46AF /* Product.m */; };
-		BDEEA124231CEC00003B46AF /* BillingResponder.h in Headers */ = {isa = PBXBuildFile; fileRef = BDEEA122231CEC00003B46AF /* BillingResponder.h */; };
-		BDEEA125231CEC00003B46AF /* BillingResponder.m in Sources */ = {isa = PBXBuildFile; fileRef = BDEEA123231CEC00003B46AF /* BillingResponder.m */; };
+		BDEEA124231CEC00003B46AF /* FeedbackResponder.h in Headers */ = {isa = PBXBuildFile; fileRef = BDEEA122231CEC00003B46AF /* FeedbackResponder.h */; };
+		BDEEA125231CEC00003B46AF /* FeedbackResponder.m in Sources */ = {isa = PBXBuildFile; fileRef = BDEEA123231CEC00003B46AF /* FeedbackResponder.m */; };
 		BDEEA128231D4F8F003B46AF /* Facade.h in Headers */ = {isa = PBXBuildFile; fileRef = BDB16CAC2313F44700931E04 /* Facade.h */; };
 /* End PBXBuildFile section */
 
@@ -37,10 +41,14 @@
 		BDC3A30823052D23002E249A /* Core.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Core.m; sourceTree = "<group>"; };
 		BDC692332375707700A473B0 /* FeedbackHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FeedbackHelper.h; sourceTree = "<group>"; };
 		BDC692342375707700A473B0 /* FeedbackHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FeedbackHelper.m; sourceTree = "<group>"; };
+		BDC6923723758D6F00A473B0 /* Network.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Network.h; sourceTree = "<group>"; };
+		BDC6923823758D6F00A473B0 /* Network.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Network.m; sourceTree = "<group>"; };
+		BDC6923B237595C800A473B0 /* ApplicationStateListener.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ApplicationStateListener.h; sourceTree = "<group>"; };
+		BDC6923C237595C800A473B0 /* ApplicationStateListener.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ApplicationStateListener.m; sourceTree = "<group>"; };
 		BDEEA11E231CE95D003B46AF /* Product.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Product.h; sourceTree = "<group>"; };
 		BDEEA11F231CE95D003B46AF /* Product.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Product.m; sourceTree = "<group>"; };
-		BDEEA122231CEC00003B46AF /* BillingResponder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BillingResponder.h; sourceTree = "<group>"; };
-		BDEEA123231CEC00003B46AF /* BillingResponder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BillingResponder.m; sourceTree = "<group>"; };
+		BDEEA122231CEC00003B46AF /* FeedbackResponder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FeedbackResponder.h; sourceTree = "<group>"; };
+		BDEEA123231CEC00003B46AF /* FeedbackResponder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FeedbackResponder.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -100,6 +108,12 @@
 				BDB16CBC23141BC200931E04 /* Feedback.m */,
 				BDC692332375707700A473B0 /* FeedbackHelper.h */,
 				BDC692342375707700A473B0 /* FeedbackHelper.m */,
+				BDEEA122231CEC00003B46AF /* FeedbackResponder.h */,
+				BDEEA123231CEC00003B46AF /* FeedbackResponder.m */,
+				BDC6923723758D6F00A473B0 /* Network.h */,
+				BDC6923823758D6F00A473B0 /* Network.m */,
+				BDC6923B237595C800A473B0 /* ApplicationStateListener.h */,
+				BDC6923C237595C800A473B0 /* ApplicationStateListener.m */,
 			);
 			path = core;
 			sourceTree = "<group>";
@@ -111,8 +125,6 @@
 				BDB16CA82313CD3F00931E04 /* Billing.m */,
 				BDEEA11E231CE95D003B46AF /* Product.h */,
 				BDEEA11F231CE95D003B46AF /* Product.m */,
-				BDEEA122231CEC00003B46AF /* BillingResponder.h */,
-				BDEEA123231CEC00003B46AF /* BillingResponder.m */,
 			);
 			path = billing;
 			sourceTree = "<group>";
@@ -125,11 +137,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				BDC3A30923052D23002E249A /* Core.h in Headers */,
+				BDC6923923758D6F00A473B0 /* Network.h in Headers */,
 				BDC692352375707700A473B0 /* FeedbackHelper.h in Headers */,
 				BDEEA120231CE95D003B46AF /* Product.h in Headers */,
+				BDC6923D237595C800A473B0 /* ApplicationStateListener.h in Headers */,
 				BDEEA128231D4F8F003B46AF /* Facade.h in Headers */,
 				BDB16CBD23141BC200931E04 /* Feedback.h in Headers */,
-				BDEEA124231CEC00003B46AF /* BillingResponder.h in Headers */,
+				BDEEA124231CEC00003B46AF /* FeedbackResponder.h in Headers */,
 				BDB16CA92313CD3F00931E04 /* Billing.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -203,10 +217,12 @@
 			files = (
 				BDC3A30A23052D23002E249A /* Core.m in Sources */,
 				BDEEA121231CE95D003B46AF /* Product.m in Sources */,
+				BDC6923E237595C800A473B0 /* ApplicationStateListener.m in Sources */,
 				BDC692362375707700A473B0 /* FeedbackHelper.m in Sources */,
 				BDB16CAE2313F4BB00931E04 /* Facade.m in Sources */,
 				BDB16CBE23141BC200931E04 /* Feedback.m in Sources */,
-				BDEEA125231CEC00003B46AF /* BillingResponder.m in Sources */,
+				BDEEA125231CEC00003B46AF /* FeedbackResponder.m in Sources */,
+				BDC6923A23758D6F00A473B0 /* Network.m in Sources */,
 				BDB16CAA2313CD3F00931E04 /* Billing.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

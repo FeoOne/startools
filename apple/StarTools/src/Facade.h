@@ -10,7 +10,7 @@
 #define Facade_h
 
 #import "Core.h"
-#import "Feedback.h"
+#import "FeedbackHelper.h"
 
 /*	MessageCenter.
  */

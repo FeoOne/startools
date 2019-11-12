@@ -21,8 +21,6 @@ NS_ASSUME_NONNULL_BEGIN
 -(void)restorePurchases;
 -(BOOL)canMakePayments;
 
--(void)registerFeedback:(Feedback *)feedback forKey:(NSNumber *)key;
-
 @end
 
 NS_ASSUME_NONNULL_END

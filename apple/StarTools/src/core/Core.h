@@ -10,6 +10,8 @@
 
 #import "Prefix.h"
 #import "Billing.h"
+#import "Network.h"
+#import "FeedbackHelper.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -20,6 +22,14 @@ typedef void (*MessageCenterDelegate)(const char *message, const char *json);
 /*	Billing control.
  */
 +(Billing *)billing;
+
+/*	Network control.
+ */
++(Network *)network;
+
+/*	Feedback helper.
+ */
++(FeedbackHelper *)feedbackHelper;
 
 /*	MessageCenter control.
  */

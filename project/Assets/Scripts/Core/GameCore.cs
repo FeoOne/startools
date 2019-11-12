@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
-using StarTools.Billing;
-using StarTools.Billing.Data;
-using StarTools.Billing.Platform;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
+
+using StarTools.Billing;
 
 namespace Core
 {

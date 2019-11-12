@@ -23,6 +23,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface FeedbackHelper : NSObject
 
+-(void)registerFeedback:(Feedback *)feedback forKey:(NSNumber *)key;
+
+-(Feedback *)getFeedback:(NSNumber *)key;
+
 @end
 
 NS_ASSUME_NONNULL_END

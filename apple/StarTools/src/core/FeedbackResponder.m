@@ -1,12 +1,12 @@
 //
-//  BillingResponder.m
+//  FeedbackResponder.m
 //  StarTools
 //
 //  Created by Feo on 02/09/2019.
 //  Copyright © 2019 FeoSoftware. All rights reserved.
 //
 
-#import "BillingResponder.h"
+#import "FeedbackResponder.h"
 
 /*	Launch json keys
  */
@@ -18,6 +18,8 @@ static const NSString * const kIdentifierKey = @"Identifier";
 static const NSString * const kProductsKey = @"Products";
 // purchase fail
 static const NSString * const kIsCancelledKey = @"IsCancelled";
+// network state
+static const NSString * const kIsConnected = @"IsConnected";
 
 /*	Product json keys
  */
@@ -27,7 +29,7 @@ static const NSString * const kProductLocalizedPriceKey = @"LocalizedPrice";
 static const NSString * const kProductPriceKey = @"Price";
 static const NSString * const kProductCurrencyCodeKey = @"CurrencyCode";
 
-@implementation BillingResponder
+@implementation FeedbackResponder
 
 +(NSDictionary *)buildLaunchSuccessResponse:(NSDictionary<NSString *, Product *> *)products
 {
@@ -76,6 +78,11 @@ static const NSString * const kProductCurrencyCodeKey = @"CurrencyCode";
 			  kMessageKey: error.localizedDescription,
 			  kIsCancelledKey: @(isCancelled)
 			  };
+}
+
++(NSDictionary *)buildNetworkStateChangedResponse:(BOOL)isConnected
+{
+	return @{ kIsConnected: @(isConnected) };
 }
 
 @end

@@ -6,6 +6,8 @@
 //  Copyright © 2019 FeoSoftware. All rights reserved.
 //
 
+#import "Prefix.h"
+
 #import "FeedbackHelper.h"
 
 @interface FeedbackHelper ()
@@ -31,9 +33,14 @@
 -(void)registerFeedback:(Feedback *)feedback forKey:(NSNumber *)key
 {
 	@synchronized (self) {
-		logmsg(@"[startools] Registering feedback for key: %@.", key);
+		logmsg(@"Registering feedback for key: %@.", key);
 		[_feedbacks setObject:feedback forKey:key];
 	}
+}
+
+-(Feedback *)getFeedback:(NSNumber *)key
+{
+	return [_feedbacks objectForKey:key];
 }
 
 @end

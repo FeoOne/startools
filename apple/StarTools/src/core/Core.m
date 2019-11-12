@@ -19,13 +19,45 @@
 
 +(Billing *)billing
 {
-	static Billing *_billing;
-	static dispatch_once_t onceToken;
-	dispatch_once(&onceToken, ^{
-		_billing = [[Billing alloc] init];
+	static Billing *billing = nil;
+	static dispatch_once_t token;
+	dispatch_once(&token, ^{
+		billing = [[Billing alloc] init];
+	});
+//	if (billing == nil) {
+//		billing = [[Billing alloc] init];
+//	}
+	
+	return billing;
+}
+
+#pragma mark - Network
+
++(Network *)network
+{
+	static Network *network = nil;
+	static dispatch_once_t token;
+	dispatch_once(&token, ^{
+		network = [[Network alloc] init];
+	});
+//	if (network == nil) {
+//		network = [[Network alloc] init];
+//	}
+	
+	return network;
+}
+
+#pragma mark - FeedbackHelper
+
++(FeedbackHelper *)feedbackHelper
+{
+	static FeedbackHelper *feedbackHelper;
+	static dispatch_once_t token;
+	dispatch_once(&token, ^{
+		feedbackHelper = [[FeedbackHelper alloc] init];
 	});
 	
-	return _billing;
+	return feedbackHelper;
 }
 
 #pragma mark - MessageCenter

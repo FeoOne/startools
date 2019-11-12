@@ -2,11 +2,12 @@
 #   undef UNITY_ASSERTIONS
 #endif
 
-using StarTools.Billing.Data;
 using UnityEngine;
 
 namespace StarTools.Billing.Platform
 {
+    using Data;
+    
     public class Product
     {
         private readonly ProductMetadata _metadata;

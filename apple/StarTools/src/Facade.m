@@ -31,7 +31,7 @@ void StarTools_RegisterFeedbackDelegate(FeedbackDelegate delegate)
 void StarTools_Billing_RegisterFeedback(int32_t key, ManagedAction action)
 {
 	if (action != NULL) {
-		[[Core billing] registerFeedback:[Feedback feedbackWithManagedAction:action] forKey:@(key)];
+		[[Core feedbackHelper] registerFeedback:[Feedback feedbackWithManagedAction:action] forKey:@(key)];
 	}
 }
 

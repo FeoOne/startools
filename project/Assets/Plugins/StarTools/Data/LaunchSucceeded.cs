@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace StarTools.Billing.Data
+namespace StarTools.Data
 {
     public class LaunchSucceeded
     {

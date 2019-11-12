@@ -20,7 +20,7 @@ namespace StarTools.Core.Apple
                 return;
             }
 
-            var action = IntPtrToObject(ptr, true);
+            var action = IntPtrToObject(ptr, false);
             if (action == null)
             {
                 Debug.LogError("[Feedback] Missed callback.");

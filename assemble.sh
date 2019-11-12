@@ -26,9 +26,9 @@ cd "${DIR}/google/application/" || exit
 ./gradlew :startools:build
 ./gradlew :startools:assemble
 
-DST="${DIR}/project/Assets/Plugins/StarTools/Platform/Android"
-rm -Rf "${DST}/*"
-mv ./startools/build/outputs/aar/startools-release.aar "${DST}/com.samberdino.startools.aar"
+DST="${DIR}/project/Assets/Plugins/StarTools/Platform/Android/Plugin"
+rm -Rf ${DST}/*
+mv ./startools/build/outputs/aar/startools-release.aar ${DST}/com.samberdino.startools.aar
 
 # Unity
 

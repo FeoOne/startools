@@ -8,6 +8,12 @@
 
 #import <Foundation/Foundation.h>
 
+#define FEEDBACK_RESPOND(key, response) \
+	Feedback *feedback = [[Core feedbackHelper] getFeedback:@(key)]; \
+	if (feedback != nil) { \
+		[feedback respond:response]; \
+	} else {logmsg(@"Feedback not set for key %d.", key);}
+
 NS_ASSUME_NONNULL_BEGIN
 
 typedef const void *ManagedAction;

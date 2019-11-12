@@ -286,7 +286,8 @@ public final class Billing implements
         List<Purchase> purchases = queryPurchasesResult.getPurchasesList();
         if (purchases != null) {
             for (Purchase purchase: purchases) {
-                if (!_purchasedTokens.contains(purchase.getPurchaseToken())) { // todo: not working - fix
+                if (!_purchasedTokens.contains(purchase.getPurchaseToken()) &&
+                    !_pendingProducts.containsKey(purchase.getPurchaseToken())) {
                     handlePurchase(purchase);
                 }
             }

@@ -6,9 +6,10 @@
 //  Copyright © 2019 FeoSoftware. All rights reserved.
 //
 
+#import "Core.h"
 #import "Prefix.h"
 #import "Product.h"
-#import "BillingResponder.h"
+#import "FeedbackResponder.h"
 
 #import "Billing.h"
 
@@ -26,8 +27,11 @@ NSString * const StarToolsErrorDomain = @"com.feosoftware.startools";
 
 @property(nonatomic, assign) LaunchState state;
 
+-(void)_tryRegisterProductIdentifier:(NSString *)identifier andType:(NSInteger)type;
 -(void)_registerProductIdentifier:(NSString *)identifier andType:(NSInteger)type;
+-(void)_tryLaunch;
 -(void)_launch;
+-(void)_tryPurchase:(NSString *)identifier;
 -(void)_purchase:(NSString *)identifier;
 -(void)_restorePurchases;
 -(BOOL)_canMakePayments;
@@ -45,9 +49,9 @@ NSString * const StarToolsErrorDomain = @"com.feosoftware.startools";
 -(instancetype)init
 {
 	if ((self = [super init])) {
-		_products = [NSMutableDictionary new];
+		[self setState:kLaunchState_NotLaunched];
 		
-		_state = kLaunchState_NotLaunched;
+		_products = [NSMutableDictionary new];
 		
 		[SKPAYMENTQUEUE addTransactionObserver:self];
 	}
@@ -59,21 +63,21 @@ NSString * const StarToolsErrorDomain = @"com.feosoftware.startools";
 -(void)registerProductIdentifier:(NSString *)identifier andType:(NSInteger)type
 {
 	@synchronized (self) {
-		[self _registerProductIdentifier:identifier andType:type];
+		[self _tryRegisterProductIdentifier:identifier andType:type];
 	}
 }
 
 -(void)launch
 {
 	@synchronized (self) {
-		[self _launch];
+		[self _tryLaunch];
 	}
 }
 
 -(void)purchase:(NSString *)identifier
 {
 	@synchronized (self) {
-		[self _purchase:identifier];
+		[self _tryPurchase:identifier];
 	}
 }
 
@@ -93,38 +97,45 @@ NSString * const StarToolsErrorDomain = @"com.feosoftware.startools";
 
 #pragma mark - Private
 
--(void)_registerProductIdentifier:(NSString *)identifier andType:(NSInteger)type
+-(void)_tryRegisterProductIdentifier:(NSString *)identifier andType:(NSInteger)type
 {
 	if (_state != kLaunchState_NotLaunched) {
-		logmsg(@"[startools] Billing launched. Late to drink borjomi.");
-		return;
+		logmsg(@"Can't register product identifier: already launched.");
+	} else {
+		[self _registerProductIdentifier:identifier andType:type];
 	}
-	
+}
+
+-(void)_registerProductIdentifier:(NSString *)identifier andType:(NSInteger)type
+{
 	Product *product = [_products objectForKey:identifier];
 	if (product == nil) {
 		product = [Product productWithIdentifier:identifier andType:(ProductType)type];
 		[_products setObject:product forKey:identifier];
-		
-		logmsg(@"[startools] Added product identifier '%@'.", identifier);
+		logmsg(@"Added product identifier '%@'.", identifier);
 	} else {
-		logmsg(@"[startools] Product '%@' already added.", identifier);
+		logmsg(@"Product '%@' already added.", identifier);
+	}
+}
+
+-(void)_tryLaunch
+{
+	if (_state != kLaunchState_NotLaunched) {
+		logmsg(@"Can't launch billing: already launched.");
+	} else {
+		[self _launch];
 	}
 }
 
 -(void)_launch
 {
-	if (_state != kLaunchState_NotLaunched) {
-		logmsg(@"[startools] Billing already launched.");
-		return;
-	}
-	
 	_state = kLaunchState_InProgress;
 	
 	DEF_WEAK_SELF;
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 		DEF_STRONG_SELF;
 		
-		logmsg(@"[startools] Billing launch started...");
+		logmsg(@"Billing launch started...");
 		
 		NSSet *identifiers = [NSSet setWithArray:[strongSelf.products allKeys]];
 		SKProductsRequest *request = [[SKProductsRequest alloc] initWithProductIdentifiers:identifiers];
@@ -133,31 +144,33 @@ NSString * const StarToolsErrorDomain = @"com.feosoftware.startools";
 	});
 }
 
--(void)_purchase:(NSString *)identifier
+-(void)_tryPurchase:(NSString *)identifier
 {
 	if (_state != kLaunchState_Launched) {
-		logmsg(@"[startools] Billing did not launched.");
-		return;
+		logmsg(@"Billing did not launched.");
+	} else {
+		[self _purchase:identifier];
 	}
-	
+}
+
+-(void)_purchase:(NSString *)identifier
+{
 	Product *product = _products[identifier];
-	if (product == nil || product.storeKitProduct == nil) {
-		logmsg(@"[startools] Can't purchase product '%@'. Identifier not found or StoreKit product doesn't assigned.", identifier);
-		return;
+	if (product != nil && product.storeKitProduct != nil) {
+		SKMutablePayment *payment = [SKMutablePayment paymentWithProduct:product.storeKitProduct];
+		[SKPAYMENTQUEUE addPayment:payment];
+	} else {
+		logmsg(@"Can't purchase product '%@'. Identifier not found or StoreKit product doesn't assigned.", identifier);
 	}
-	
-	SKMutablePayment *payment = [SKMutablePayment paymentWithProduct:product.storeKitProduct];
-	[SKPAYMENTQUEUE addPayment:payment];
 }
 
 -(void)_restorePurchases
 {
-	if (_state != kLaunchState_Launched) {
-		logmsg(@"[startools] Billing did not launched.");
-		return;
+	if (_state == kLaunchState_Launched) {
+		[SKPAYMENTQUEUE restoreCompletedTransactions];
+	} else {
+		logmsg(@"Billing did not launched.");
 	}
-	
-	[SKPAYMENTQUEUE restoreCompletedTransactions];
 }
 
 -(BOOL)_canMakePayments
@@ -169,50 +182,35 @@ NSString * const StarToolsErrorDomain = @"com.feosoftware.startools";
 
 -(void)onPaymentTransactionPurchased:(SKPaymentTransaction *)transaction
 {
-	logmsg(@"[startools] Purchase '%@' succeeded.", transaction.payment.productIdentifier);
+	logmsg(@"Purchase '%@' succeeded.", transaction.payment.productIdentifier);
 	
 	[SKPAYMENTQUEUE finishTransaction:transaction];
 	
-	Feedback *feedback = [_feedbacks objectForKey:@(kFeedbackKey_PurchaseSucceeded)];
-	if (feedback != nil) {
-		[feedback respond:[BillingResponder buildPurchaseSucceededResponse:transaction]];
-	} else {
-		logmsg(@"[startools] Can't respond OnPaymentTransactionPurchased. Feedback not set.");
-	}
+	FEEDBACK_RESPOND(kFeedbackKey_PurchaseSucceeded, [FeedbackResponder buildPurchaseSucceededResponse:transaction])
 }
 
 -(void)onPaymentTransactionRestored:(SKPaymentTransaction *)transaction
 {
-	logmsg(@"[startools] Purchase '%@' restored.", transaction.payment.productIdentifier);
+	logmsg(@"Purchase '%@' restored.", transaction.payment.productIdentifier);
 	
 	[SKPAYMENTQUEUE finishTransaction:transaction];
 	
-	Feedback *feedback = [_feedbacks objectForKey:@(kFeedbackKey_PurchaseRestored)];
-	if (feedback != nil) {
-		[feedback respond:[BillingResponder buildPurchaseRestoredResponse:transaction]];
-	} else {
-		logmsg(@"[startools] Can't respond OnPaymentTransactionRestored. Feedback not set.");
-	}
+	FEEDBACK_RESPOND(kFeedbackKey_PurchaseRestored, [FeedbackResponder buildPurchaseRestoredResponse:transaction])
 }
 
 -(void)onPaymentTransactionFailed:(SKPaymentTransaction *)transaction
 {
-	logmsg(@"[startools] Purchase '%@' failed.", transaction.payment.productIdentifier);
+	logmsg(@"Purchase '%@' failed.", transaction.payment.productIdentifier);
 	
 	[SKPAYMENTQUEUE finishTransaction:transaction];
 	
 	NSError *error = transaction.error;
 	if (error == nil) {
-		logmsg(@"[startools] OnPaymentTransactionFailed internal error.");
+		logmsg(@"OnPaymentTransactionFailed internal error.");
 		error = [NSError errorWithDomain:StarToolsErrorDomain code:-1 userInfo:nil];
 	}
 	
-	Feedback *feedback = [_feedbacks objectForKey:@(kFeedbackKey_PurchaseFailed)];
-	if (feedback != nil) {
-		[feedback respond:[BillingResponder buildPurchaseFailedResponse:error]];
-	} else {
-		logmsg(@"[startools] Can't respond OnPaymentTransactionFailed. Feedback not set.");
-	}
+	FEEDBACK_RESPOND(kFeedbackKey_PurchaseFailed, [FeedbackResponder buildPurchaseFailedResponse:error])
 }
 
 #pragma mark - SKPaymentTransactionObserver
@@ -222,7 +220,7 @@ NSString * const StarToolsErrorDomain = @"com.feosoftware.startools";
 	for (SKPaymentTransaction *transaction in transactions) {
 		switch (transaction.transactionState) {
 			case SKPaymentTransactionStatePurchasing: {
-				logmsg(@"[startools] SKPaymentTransactionStatePurchasing");
+				logmsg(@"SKPaymentTransactionStatePurchasing");
 				break;
 			}
 			case SKPaymentTransactionStateDeferred: {
@@ -252,13 +250,13 @@ NSString * const StarToolsErrorDomain = @"com.feosoftware.startools";
 
 -(void)paymentQueue:(SKPaymentQueue *)queue restoreCompletedTransactionsFailedWithError:(NSError *)error
 {
-	logmsg(@"[startools] Purchases restored with error: %@", error.localizedDescription);
+	logmsg(@"Purchases restored with error: %@", error.localizedDescription);
 	// todo
 }
 
 -(void)paymentQueueRestoreCompletedTransactionsFinished:(SKPaymentQueue *)queue
 {
-	logmsg(@"[startools] Purchases restored successfully.");
+	logmsg(@"Purchases restored successfully.");
 	// todo
 }
 
@@ -279,7 +277,7 @@ NSString * const StarToolsErrorDomain = @"com.feosoftware.startools";
 	uint32_t receivedProductCount = (uint32_t)response.products.count;
 	uint32_t existingProductCount = (uint32_t)_products.count;
 	
-	logmsg(@"[startools] Start succeded. Received product count: %u, existing product count: %u.",
+	logmsg(@"Start succeded. Received product count: %u, existing product count: %u.",
 		   receivedProductCount,
 		   existingProductCount);
 	
@@ -293,35 +291,27 @@ NSString * const StarToolsErrorDomain = @"com.feosoftware.startools";
 	
 	// check invalid identifiers
 	for (NSString *identifier in response.invalidProductIdentifiers) {
-		logmsg(@"[startools] Invalid product identifier: '%@'.", identifier);
+		logmsg(@"Invalid product identifier: '%@'.", identifier);
 		[_products removeObjectForKey:identifier];
 	}
 	
-	Feedback *feedback = [_feedbacks objectForKey:@(kFeedbackKey_LaunchSucceeded)];
-	if (feedback != nil) {
-		[feedback respond:[BillingResponder buildLaunchSuccessResponse:_products]];
-	} else {
-		logmsg(@"[startools] Can't respond OnLaunchSucceeded. Feedback not set.");
-	}
+	FEEDBACK_RESPOND(kFeedbackKey_LaunchSucceeded, [FeedbackResponder buildLaunchSuccessResponse:_products])
 	
 	_state = kLaunchState_Launched;
 }
 
 -(void)request:(SKRequest *)request didFailWithError:(NSError *)error
 {
-	Feedback *feedback = [_feedbacks objectForKey:@(kFeedbackKey_LaunchFailed)];
-	if (feedback != nil) {
-		[feedback respond:[BillingResponder buildLaunchFailResponse:error]];
-	} else {
-		logmsg(@"[startools] Can't respond OnLaunchFailed. Feedback not set.");
-	}
+	logmsg(@"Launch failed: %@", error.localizedDescription);
+	
+	FEEDBACK_RESPOND(kFeedbackKey_LaunchFailed, [FeedbackResponder buildLaunchFailResponse:error])
 	
 	_state = kLaunchState_NotLaunched;
 }
 
 -(void)requestDidFinish:(SKRequest *)request
 {
-	logmsg(@"[startools] Billing launch finished.");
+	logmsg(@"Billing launch finished.");
 }
 
 @end

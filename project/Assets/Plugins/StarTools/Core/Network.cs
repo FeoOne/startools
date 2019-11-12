@@ -1,9 +1,10 @@
-using StarTools.Billing.Data;
-using StarTools.Event;
 using UnityEngine;
 
 namespace StarTools.Core
 {
+    using Data;
+    using Event;
+    
     public class Network
     {
         public static Network Instance { get; private set; }
