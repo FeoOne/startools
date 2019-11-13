@@ -18,6 +18,9 @@ import com.unity3d.player.UnityPlayer;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class NetworkListener extends BroadcastReceiver {
     public interface Handler {
@@ -70,11 +73,17 @@ public final class NetworkListener extends BroadcastReceiver {
                         @Override
                         public void onAvailable(Network network) {
                             application.sendBroadcast(intent);
+
+                            FeedbackHelper.sendFeedback(FeedbackHelper.NETWORK_STATE_CHANGED_KEY,
+                                    Responder.buildNetworkStateChangedResponse(true));
                         }
 
                         @Override
                         public void onLost(Network network) {
                             application.sendBroadcast(intent);
+
+                            FeedbackHelper.sendFeedback(FeedbackHelper.NETWORK_STATE_CHANGED_KEY,
+                                    Responder.buildNetworkStateChangedResponse(false));
                         }
                     });
         } else {

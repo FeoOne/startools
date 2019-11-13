@@ -19,6 +19,11 @@ public class FeedbackHelper {
         _feedbacks.put(key, feedback);
     }
 
+    /**
+     * Thread safe.
+     * @param key
+     * @param response
+     */
     public static void sendFeedback(final int key, @Nullable final JSONObject response) {
         Core.runOnMainThread(new Runnable() {
             @Override
