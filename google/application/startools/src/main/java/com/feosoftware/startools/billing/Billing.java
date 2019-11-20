@@ -444,8 +444,15 @@ public final class Billing implements
             if (purchaseHistoryRecordList != null) {
                 for (PurchaseHistoryRecord record: purchaseHistoryRecordList) {
                     Log.i(TAG, "PurchaseHistoryRecord: " + record.getSku());
-//                    record
-                    // todo: onPurchaseSucceeded?
+
+                    if (_products.containsKey(record.getSku())) {
+                        Product product = _products.get(record.getSku());
+                        if (product != null && product.getType() == Product.NONCONSUMABLE_TYPE) {
+                            onPurchaseSucceeded(record.getSku());
+                        }
+                    } else {
+                        Log.i(TAG, "Product not presented...");
+                    }
                 }
             }
         } else {
