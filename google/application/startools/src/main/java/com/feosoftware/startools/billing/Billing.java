@@ -42,16 +42,13 @@ public final class Billing implements
         ConsumeResponseListener,
         AcknowledgePurchaseResponseListener,
         PurchaseHistoryResponseListener,
-        Application.ActivityLifecycleCallbacks,
-        NetworkListener.Handler
+        Application.ActivityLifecycleCallbacks
 {
     private static final String TAG = "Billing";
 
     private static final int NOT_LAUNCHED_LAUNCH_STATE = 0;
     private static final int LAUNCHING_LAUNCH_STATE = 1;
     private static final int LAUNCHED_LAUNCH_STATE = 2;
-
-
 
     private BillingClient _billingClient;
 
@@ -78,8 +75,6 @@ public final class Billing implements
                 .build();
 
         UnityPlayer.currentActivity.getApplication().registerActivityLifecycleCallbacks(this); // todo: refactor
-
-        NetworkListener.registerHandler(this);
 
         Log.i(TAG, "Billing initialized.");
     }
@@ -474,33 +469,55 @@ public final class Billing implements
     public void onActivitySaveInstanceState(Activity activity, Bundle outState) { }
 
     @Override
-    public void onActivityStarted(Activity activity) { }
+    public void onActivityStarted(Activity activity) {
+        if (activity != UnityPlayer.currentActivity) {
+            return;
+        }
+
+        NetworkListener.start();
+    }
 
     @Override
-    public void onActivityStopped(Activity activity) { }
+    public void onActivityStopped(Activity activity) {
+        if (activity != UnityPlayer.currentActivity) {
+            return;
+        }
 
-    @Override
-    public void onActivityPaused(Activity activity) { }
+        NetworkListener.stop();
+    }
 
     @Override
     public void onActivityResumed(Activity activity) {
-        if (activity == UnityPlayer.currentActivity) {
-            Log.i(TAG, "onActivityResumed");
-
-            if (_state == LAUNCHED_LAUNCH_STATE) {
-                queryPurchases();
-            }
+        if (activity != UnityPlayer.currentActivity) {
+            return;
         }
+
+        Log.i(TAG, "onActivityResumed");
+
+        NetworkListener.start();
+
+        if (_state == LAUNCHED_LAUNCH_STATE) {
+            queryPurchases();
+        }
+    }
+
+    @Override
+    public void onActivityPaused(Activity activity) {
+        if (activity != UnityPlayer.currentActivity) {
+            return;
+        }
+
+        NetworkListener.stop();
     }
 
     /**
      * NetworkListener.Handler
      */
 
-    @Override
-    public void onStateChanged(boolean isConnected) {
-        if (isConnected && _state == LAUNCHED_LAUNCH_STATE) {
-            queryPurchases();
-        }
-    }
+//    @Override
+//    public void onStateChanged(boolean isConnected) {
+//        if (isConnected && _state == LAUNCHED_LAUNCH_STATE) {
+//            queryPurchases();
+//        }
+//    }
 }

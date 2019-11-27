@@ -1,115 +1,60 @@
 package com.feosoftware.startools.system;
 
-import android.app.Application;
-import android.net.Network;
-import android.net.NetworkRequest;
-import android.os.Build;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.support.annotation.RequiresApi;
-import android.util.Log;
-
 import com.feosoftware.startools.core.FeedbackHelper;
-import com.unity3d.player.UnityPlayer;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.io.IOException;
+import java.net.Socket;
+import java.net.InetSocketAddress;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-public final class NetworkListener extends BroadcastReceiver {
-    public interface Handler {
-        void onStateChanged(boolean isConnected);
-    }
+public final class NetworkListener {
+    private static Timer _timer;
+    private static boolean _isConnected;
 
-    private static final String TAG = "NetworkListener";
-
-    private static final String CONNECTIVITY_ACTION = "com.feosoftware.startools.system.CONNECTIVITY_CHANGE";
-
-    private static List<Handler> _handlers = new LinkedList<>();
-
-    public static void registerHandler(Handler handler) {
-        if (!_handlers.contains(handler)) {
-            _handlers.add(handler);
-        }
-    }
-
-    public static void unregisterHandler(Handler handler) {
-        _handlers.remove(handler);
-    }
-
-    public static void setup() {
-        IntentFilter filter = new IntentFilter();
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            createConnectivityMonitor();
-            filter.addAction(CONNECTIVITY_ACTION);
-        } else {
-            filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+    public static void start() {
+        if (_timer != null) {
+            return;
         }
 
-        NetworkListener broadcastReceiver = new NetworkListener();
-        UnityPlayer.currentActivity.registerReceiver(broadcastReceiver, filter);
+        _isConnected = true;
 
-        Log.i(TAG, "Setup.");
+        _timer = new Timer();
+        _timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                boolean isConnected = isConnected();
+                if (_isConnected != isConnected) {
+                    _isConnected = isConnected;
+
+                    FeedbackHelper.sendFeedback(FeedbackHelper.NETWORK_STATE_CHANGED_KEY,
+                            Responder.buildNetworkStateChangedResponse(isConnected));
+                }
+            }
+        }, 0, 1100);
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
-    private static void createConnectivityMonitor() {
-        final Intent intent = new Intent(CONNECTIVITY_ACTION);
-        final Application application = UnityPlayer.currentActivity.getApplication();
-
-        ConnectivityManager connectivityManager =
-                (ConnectivityManager)UnityPlayer.currentActivity.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        if (connectivityManager != null) {
-            connectivityManager.registerNetworkCallback(new NetworkRequest.Builder().build(),
-                    new ConnectivityManager.NetworkCallback() {
-                        @Override
-                        public void onAvailable(Network network) {
-                            application.sendBroadcast(intent);
-
-                            FeedbackHelper.sendFeedback(FeedbackHelper.NETWORK_STATE_CHANGED_KEY,
-                                    Responder.buildNetworkStateChangedResponse(true));
-                        }
-
-                        @Override
-                        public void onLost(Network network) {
-                            application.sendBroadcast(intent);
-
-                            FeedbackHelper.sendFeedback(FeedbackHelper.NETWORK_STATE_CHANGED_KEY,
-                                    Responder.buildNetworkStateChangedResponse(false));
-                        }
-                    });
-        } else {
-            Log.e(TAG, "Failed to create connectivity monitor (manager == null).");
-        }
-    }
-
-    private boolean isConnected(Context context) {
-        ConnectivityManager connectivityManager =
-                (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
-
-        return activeNetwork != null && activeNetwork.isConnected();
-    }
-
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        boolean connected = isConnected(context);
-
-        Log.i(TAG, "State changed: " + connected);
-
-        for (Handler handler: _handlers) {
-            handler.onStateChanged(connected);
+    public static void stop() {
+        if (_timer == null) {
+            return;
         }
 
-        FeedbackHelper.sendFeedback(FeedbackHelper.NETWORK_STATE_CHANGED_KEY,
-                Responder.buildNetworkStateChangedResponse(connected));
+        _timer.cancel();
+        _timer.purge();
+
+        _timer = null;
+    }
+
+    private static boolean isConnected() {
+        try {
+            Socket socket = new Socket();
+            socket.connect(new InetSocketAddress("8.8.8.8", 53), 1000);
+            socket.close();
+
+            return true;
+        }
+        catch (IOException e) {
+            return false;
+        }
     }
 }

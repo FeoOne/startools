@@ -10,34 +10,54 @@
 
 #import "Core.h"
 #import "FeedbackResponder.h"
+#import "NetworkReachability.h"
 
 #import "Network.h"
 
+@interface Network ()
+@property (nonatomic, strong) Reachability *reachability;
+-(void)respond:(BOOL)isConnected;
+@end
+
 @implementation Network
+
+-(instancetype)init
+{
+    if ((self = [super init])) {
+        _reachability = [Reachability reachabilityWithHostname:@"www.google.com"];
+        
+        DEF_WEAK_SELF;
+        
+        [_reachability setReachableBlock:^(Reachability *reachability) {
+            DEF_STRONG_SELF;
+            [strongSelf respond:YES];
+        }];
+        
+        [_reachability setUnreachableBlock:^(Reachability *reachability) {
+            DEF_STRONG_SELF;
+            [strongSelf respond:NO];
+        }];
+    }
+    return self;
+}
 
 -(void)startListen
 {
-	[[UIApplication sharedApplication] addObserver:self forKeyPath:@"networkActivityIndicatorVisible" options:NSKeyValueObservingOptionNew context:nil];
+    [_reachability startNotifier];
 }
 
 -(void)stopListen
 {
-	[[UIApplication sharedApplication] removeObserver:self forKeyPath:@"networkActivityIndicatorVisible"];
+    [_reachability stopNotifier];
 }
 
--(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+-(void)respond:(BOOL)isConnected
 {
-    if ([keyPath isEqualToString:@"networkActivityIndicatorVisible"]) {
-        logmsg(@"Network activity indicator change!");
-		
-        BOOL active = [UIApplication sharedApplication].networkActivityIndicatorVisible;
-		
-		Feedback *feedback = [[Core feedbackHelper] getFeedback:@(kFeedbackKey_NetworkStateChanged)];
-		if (feedback != nil) {
-			[feedback respond:[FeedbackResponder buildNetworkStateChangedResponse:active]];
-		} else {
-			logmsg(@"Can't respond 'networkActivityIndicatorVisible'. Feedback not set.");
-		}
+    Feedback *feedback = [[Core feedbackHelper] getFeedback:@(kFeedbackKey_NetworkStateChanged)];
+    if (feedback != nil) {
+        [feedback respond:[FeedbackResponder buildNetworkStateChangedResponse:isConnected]];
+    } else {
+        logmsg(@"Can't respond 'networkActivityIndicatorVisible'. Feedback not set.");
     }
 }
 

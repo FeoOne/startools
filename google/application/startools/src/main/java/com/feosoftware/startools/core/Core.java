@@ -12,8 +12,6 @@ public final class Core {
         if (_mainThreadHandler == null) {
             _mainThreadHandler = new Handler();
         }
-
-        NetworkListener.setup();
     }
 
     public static void registerMessageCenterHandler(MessageCenter messageCenterHandler) {
