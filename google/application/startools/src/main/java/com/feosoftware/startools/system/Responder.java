@@ -2,13 +2,15 @@ package com.feosoftware.startools.system;
 
 import android.util.Log;
 
+import com.feosoftware.startools.core.Journal;
+
 import org.json.JSONObject;
 import org.json.JSONException;
 
 final class Responder {
-    private static final String TAG = "NetworkResponder";
+    private static final String CATEGORY = "NetworkResponder";
 
-    private static final String IS_CONNECTED_KEY = "Code";
+    private static final String IS_CONNECTED_KEY = "IsConnected";
 
     static JSONObject buildNetworkStateChangedResponse(boolean isConnected) {
         JSONObject response = null;
@@ -19,7 +21,7 @@ final class Responder {
             response.put(IS_CONNECTED_KEY, isConnected);
         }
         catch (JSONException e) {
-            Log.e(TAG, "Can't buildNetworkStateChangedResponse: " + e.getMessage());
+            Journal.e(CATEGORY, "Can't buildNetworkStateChangedResponse: " + e.getMessage());
         }
 
         return response;

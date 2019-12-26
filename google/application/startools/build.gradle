@@ -19,6 +19,7 @@ android {
 }
 
 dependencies {
+    implementation 'com.android.support:support-compat:28.0.0'
     compileOnly files('libs/classes.jar')
     implementation 'com.android.billingclient:billing:2.0.1'
     implementation 'com.android.support:support-annotations:28.0.0'

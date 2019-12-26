@@ -3,7 +3,6 @@ package com.feosoftware.startools.billing;
 import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
-import android.util.Log;
 import android.support.annotation.Nullable;
 
 import com.android.billingclient.api.AcknowledgePurchaseParams;
@@ -31,6 +30,7 @@ import com.android.billingclient.api.SkuDetailsParams;
 import com.android.billingclient.api.SkuDetailsResponseListener;
 
 import com.feosoftware.startools.core.FeedbackHelper;
+import com.feosoftware.startools.core.Journal;
 import com.feosoftware.startools.system.NetworkListener;
 
 import com.unity3d.player.UnityPlayer;
@@ -42,9 +42,10 @@ public final class Billing implements
         ConsumeResponseListener,
         AcknowledgePurchaseResponseListener,
         PurchaseHistoryResponseListener,
-        Application.ActivityLifecycleCallbacks
+        Application.ActivityLifecycleCallbacks,
+        NetworkListener.INetworkListenerListener
 {
-    private static final String TAG = "Billing";
+    private static final String CATEGORY = "Billing";
 
     private static final int NOT_LAUNCHED_LAUNCH_STATE = 0;
     private static final int LAUNCHING_LAUNCH_STATE = 1;
@@ -74,9 +75,11 @@ public final class Billing implements
                 .setListener(this)
                 .build();
 
+        NetworkListener.addListener(this);
+
         UnityPlayer.currentActivity.getApplication().registerActivityLifecycleCallbacks(this); // todo: refactor
 
-        Log.i(TAG, "Billing initialized.");
+        Journal.i(CATEGORY, "Billing initialized.");
     }
 
     /**
@@ -91,7 +94,7 @@ public final class Billing implements
 
     private void _registerProduct(String identifier, int type) {
         if (_state != NOT_LAUNCHED_LAUNCH_STATE) {
-            Log.w(TAG, "Billing launched. Late to drink borjomi.");
+            Journal.w(CATEGORY, "Billing already launched.");
             return;
         }
 
@@ -100,9 +103,9 @@ public final class Billing implements
             product = new Product(identifier, type);
             _products.put(identifier, product);
 
-            Log.i(TAG, "Added product identifier '" + identifier + "'");
+            Journal.i(CATEGORY, "Added product identifier '" + identifier + "'");
         } else {
-            Log.w(TAG, "Product '" + identifier + "' already added.");
+            Journal.w(CATEGORY, "Product '" + identifier + "' already added.");
         }
     }
 
@@ -115,11 +118,11 @@ public final class Billing implements
     private void _launch()
     {
         if (_state != NOT_LAUNCHED_LAUNCH_STATE) {
-            Log.e(TAG, "Billing already launched.");
+            Journal.e(CATEGORY, "Billing already launched.");
             return;
         }
 
-        Log.i(TAG, "Launch started...");
+        Journal.i(CATEGORY, "Launch started...");
 
         _state = LAUNCHING_LAUNCH_STATE;
 
@@ -134,15 +137,15 @@ public final class Billing implements
 
     private void _purchase(String identifier) {
         if (_state != LAUNCHED_LAUNCH_STATE) {
-            Log.e(TAG, "Billing not launched.");
+            Journal.e(CATEGORY, "Billing not launched.");
             return;
         }
 
-        Log.i(TAG, "Purchasing '" + identifier + "'.");
+        Journal.i(CATEGORY, "Purchasing '" + identifier + "'.");
 
         Product product = _products.get(identifier);
         if (product == null) {
-            Log.e(TAG, "Can't purchase unavailable product.");
+            Journal.e(CATEGORY, "Can't purchase unavailable product.");
             return;
         }
 
@@ -151,7 +154,7 @@ public final class Billing implements
                 .build();
         BillingResult billingResult = _billingClient.launchBillingFlow(UnityPlayer.currentActivity, params);
 
-        Log.i(TAG, "Billing flow launch result: " + billingResult.getResponseCode() + ".");
+        Journal.i(CATEGORY, "Billing flow launch result: " + billingResult.getResponseCode() + ".");
     }
 
     public void restorePurchases() {
@@ -169,7 +172,7 @@ public final class Billing implements
      */
 
     private void onLaunchSucceeded() {
-        Log.i(TAG, "Launch succeeded. Querying products.");
+        Journal.i(CATEGORY, "Launch succeeded. Querying products.");
 
         List<String> skuList = new ArrayList<>();
         for (Product product: _products.values()) {
@@ -206,7 +209,7 @@ public final class Billing implements
     }
 
     private void handlePurchase(Purchase purchase) {
-        Log.i(TAG, "Handling purchase for '"
+        Journal.i(CATEGORY, "Handling purchase for '"
                 + purchase.getSku() + "' with state '"
                 + purchase.getPurchaseState() + "'.");
 
@@ -226,25 +229,25 @@ public final class Billing implements
                             break;
                         }
                         default: {
-                            Log.e(TAG, "Not implemented.");
+                            Journal.e(CATEGORY, "Not implemented.");
                             // todo: implement
                         }
                     }
                 } else {
-                    Log.e(TAG, "Fatal error: purchasing product not presented.");
+                    Journal.e(CATEGORY, "Fatal error: purchasing product not presented.");
                     // todo: maybe we need notify client for unlock interface
                 }
 
                 break;
             }
             case Purchase.PurchaseState.PENDING: {
-                Log.i(TAG, "Pending purchase.");
+                Journal.i(CATEGORY, "Pending purchase.");
                 // todo: maybe we need notify client for unlock interface
 
                 break;
             }
             case Purchase.PurchaseState.UNSPECIFIED_STATE: {
-                Log.e(TAG, "UNSPECIFIED_STATE purchase state.");
+                Journal.e(CATEGORY, "UNSPECIFIED_STATE purchase state.");
                 // todo: maybe we need notify client for unlock interface
 
                 break;
@@ -253,7 +256,7 @@ public final class Billing implements
     }
 
     private void consumePurchase(Purchase purchase) {
-        Log.i(TAG, "Consuming purchase " + purchase.getSku());
+        Journal.i(CATEGORY, "Consuming purchase " + purchase.getSku());
 
         _pendingProducts.put(purchase.getPurchaseToken(), purchase.getSku());
 
@@ -273,10 +276,10 @@ public final class Billing implements
     }
 
     private void queryPurchases() {
-        Log.i(TAG, "Querying purchases.");
+        Journal.i(CATEGORY, "Querying purchases.");
 
         Purchase.PurchasesResult queryPurchasesResult = _billingClient.queryPurchases(BillingClient.SkuType.INAPP);
-        Log.i(TAG, "Querying purchases result: " + queryPurchasesResult.getResponseCode());
+        Journal.i(CATEGORY, "Querying purchases result: " + queryPurchasesResult.getResponseCode());
 
         List<Purchase> purchases = queryPurchasesResult.getPurchasesList();
         if (purchases != null) {
@@ -305,13 +308,13 @@ public final class Billing implements
                         handlePurchase(purchase);
                     }
                 } else {
-                    Log.e(TAG, "OnPurchasesUpdated: Internal error (purchases = null).");
+                    Journal.e(CATEGORY, "OnPurchasesUpdated: Internal error (purchases = null).");
                     onPurchaseFailed(billingResult);
                 }
                 break;
             }
             default: {
-                Log.e(TAG, "OnPurchasesUpdated: Purchase failed: " + billingResult.getResponseCode());
+                Journal.e(CATEGORY, "OnPurchasesUpdated: Purchase failed: " + billingResult.getResponseCode());
                 onPurchaseFailed(billingResult);
             }
         }
@@ -328,7 +331,7 @@ public final class Billing implements
     @Override
     public void onBillingSetupFinished(BillingResult billingResult) {
         if (billingResult.getResponseCode() != BillingClient.BillingResponseCode.OK) {
-            Log.e(TAG, "Failed to launch billing.");
+            Journal.e(CATEGORY, "Failed to launch billing.");
 
             onLaunchFailed(billingResult);
 
@@ -340,7 +343,7 @@ public final class Billing implements
 
     @Override
     public void onBillingServiceDisconnected() {
-        Log.w(TAG, "Billing service connection was lost. ");
+        Journal.w(CATEGORY, "Billing service connection was lost. ");
     }
 
     /**
@@ -350,18 +353,18 @@ public final class Billing implements
     @Override
     public void onSkuDetailsResponse(BillingResult billingResult, List<SkuDetails> skuDetailsList) {
         if (billingResult.getResponseCode() != BillingClient.BillingResponseCode.OK) {
-            Log.e(TAG, "Failed to querying products (" + billingResult.getResponseCode() + ").");
+            Journal.e(CATEGORY, "Failed to querying products (" + billingResult.getResponseCode() + ").");
 
             onLaunchFailed(billingResult);
 
             return;
         }
 
-        Log.i(TAG, "Products queried succeeesfully.");
+        Journal.i(CATEGORY, "Products queried succeeesfully.");
 
         // fill products
         if (skuDetailsList != null) {
-            Log.i(TAG, "Queried product count: " + skuDetailsList.size());
+            Journal.i(CATEGORY, "Queried product count: " + skuDetailsList.size());
 
             for (SkuDetails details: skuDetailsList) {
                 Product product = _products.get(details.getSku());
@@ -377,7 +380,7 @@ public final class Billing implements
 
         _state = LAUNCHED_LAUNCH_STATE;
 
-        Log.i(TAG, "Billing launched.");
+        Journal.i(CATEGORY, "Billing launched.");
 
         queryPurchases();
     }
@@ -391,7 +394,7 @@ public final class Billing implements
         String identifier = _pendingProducts.get(purchaseToken);
 
         if (billingResult.getResponseCode() != BillingClient.BillingResponseCode.OK) {
-            Log.e(TAG, "[onConsumeResponse] Purchase failed: " + billingResult.getResponseCode());
+            Journal.e(CATEGORY, "[onConsumeResponse] Purchase failed: " + billingResult.getResponseCode());
 
             onPurchaseFailed(billingResult);
 
@@ -402,10 +405,10 @@ public final class Billing implements
             return;
         }
 
-        Log.i(TAG, "[onConsumeResponse] Consuming purchase " + identifier);
+        Journal.i(CATEGORY, "[onConsumeResponse] Consuming purchase " + identifier);
 
         if (identifier == null) {
-            Log.e(TAG, "[onConsumeResponse] Identifier not presented but purchases succeeded. Token '"
+            Journal.e(CATEGORY, "[onConsumeResponse] Identifier not presented but purchases succeeded. Token '"
                     + purchaseToken + "'.");
 
             onPurchaseFailed(billingResult);
@@ -425,7 +428,7 @@ public final class Billing implements
 
     @Override
     public void onAcknowledgePurchaseResponse(BillingResult billingResult) {
-        Log.i(TAG, "Purchase acknowledgement result: " + billingResult.getResponseCode() + ".");
+        Journal.i(CATEGORY, "Purchase acknowledgement result: " + billingResult.getResponseCode() + ".");
     }
 
     /**
@@ -438,7 +441,7 @@ public final class Billing implements
         if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
             if (purchaseHistoryRecordList != null) {
                 for (PurchaseHistoryRecord record: purchaseHistoryRecordList) {
-                    Log.i(TAG, "PurchaseHistoryRecord: " + record.getSku());
+                    Journal.i(CATEGORY, "PurchaseHistoryRecord: " + record.getSku());
 
                     if (_products.containsKey(record.getSku())) {
                         Product product = _products.get(record.getSku());
@@ -446,12 +449,12 @@ public final class Billing implements
                             onPurchaseSucceeded(record.getSku());
                         }
                     } else {
-                        Log.i(TAG, "Product not presented...");
+                        Journal.i(CATEGORY, "Product not presented...");
                     }
                 }
             }
         } else {
-            Log.e(TAG, "Purchase history response error: " + billingResult.getResponseCode() + ".");
+            Journal.e(CATEGORY, "Purchase history response error: " + billingResult.getResponseCode() + ".");
         }
     }
 
@@ -492,7 +495,7 @@ public final class Billing implements
             return;
         }
 
-        Log.i(TAG, "onActivityResumed");
+        Journal.i(CATEGORY, "onActivityResumed");
 
         NetworkListener.start();
 
@@ -514,10 +517,10 @@ public final class Billing implements
      * NetworkListener.Handler
      */
 
-//    @Override
-//    public void onStateChanged(boolean isConnected) {
-//        if (isConnected && _state == LAUNCHED_LAUNCH_STATE) {
-//            queryPurchases();
-//        }
-//    }
+    @Override
+    public void onStateChanged(boolean isConnected) {
+        if (isConnected && _state == LAUNCHED_LAUNCH_STATE) {
+            queryPurchases();
+        }
+    }
 }

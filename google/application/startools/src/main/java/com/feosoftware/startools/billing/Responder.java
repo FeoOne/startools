@@ -1,10 +1,10 @@
 package com.feosoftware.startools.billing;
 
-import android.util.Log;
 import android.support.annotation.Nullable;
 
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingResult;
+import com.feosoftware.startools.core.Journal;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -13,7 +13,7 @@ import org.json.JSONObject;
 import java.util.Collection;
 
 final class Responder {
-    private static final String TAG = "BillingResponder";
+    private static final String CATEGORY = "BillingResponder";
 
     // shared
     private static final String CODE_KEY = "Code";
@@ -63,7 +63,7 @@ final class Responder {
             response.put(PRODUCTS_KEY, array);
         }
         catch (JSONException e) {
-            Log.e(TAG, "Can't buildLaunchSucceededResponse: " + e.getMessage());
+            Journal.e(CATEGORY, "Can't buildLaunchSucceededResponse: " + e.getMessage());
         }
 
         return response;
@@ -79,7 +79,7 @@ final class Responder {
             response.put(MESSAGE_KEY, billingResult.getDebugMessage());
         }
         catch (JSONException e) {
-            Log.e(TAG, "Can't buildLaunchFailedResponse: " + e.getMessage());
+            Journal.e(CATEGORY, "Can't buildLaunchFailedResponse: " + e.getMessage());
         }
 
         return response;
@@ -94,7 +94,7 @@ final class Responder {
             response.put(IDENTIFIER_KEY, identifier);
         }
         catch (JSONException e) {
-            Log.e(TAG, "Can't buildPurchaseSucceededResponse: " + e.getMessage());
+            Journal.e(CATEGORY, "Can't buildPurchaseSucceededResponse: " + e.getMessage());
         }
 
         return response;
@@ -112,7 +112,7 @@ final class Responder {
                     billingResult.getResponseCode() == BillingClient.BillingResponseCode.USER_CANCELED);
         }
         catch (JSONException e) {
-            Log.e(TAG, "Can't buildPurchaseFailedResponse: " + e.getMessage());
+            Journal.e(CATEGORY, "Can't buildPurchaseFailedResponse: " + e.getMessage());
         }
 
         return response;
