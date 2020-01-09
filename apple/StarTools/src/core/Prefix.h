@@ -12,6 +12,7 @@
 #define DEF_WEAK_SELF			__typeof(self) __weak weakSelf = self
 #define DEF_STRONG_SELF			__typeof(self) strongSelf = weakSelf
 
+#define NSBUNDLE                [NSBundle mainBundle]
 #define SKPAYMENTQUEUE			[SKPaymentQueue defaultQueue]
 #define NSNOTIFICATIONCENTER	[NSNotificationCenter defaultCenter]
 

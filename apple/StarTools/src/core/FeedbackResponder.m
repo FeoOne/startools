@@ -6,6 +6,8 @@
 //  Copyright © 2019 FeoSoftware. All rights reserved.
 //
 
+#import "Prefix.h"
+
 #import "FeedbackResponder.h"
 
 /*	Launch json keys
@@ -16,6 +18,8 @@ static const NSString * const kMessageKey = @"Message";
 static const NSString * const kIdentifierKey = @"Identifier";
 // launch success
 static const NSString * const kProductsKey = @"Products";
+// purchase succeeded
+static const NSString * const kReceiptKey = @"Receipt";
 // purchase fail
 static const NSString * const kIsCancelledKey = @"IsCancelled";
 // network state
@@ -63,7 +67,12 @@ static const NSString * const kProductCurrencyCodeKey = @"CurrencyCode";
 
 +(NSDictionary *)buildPurchaseSucceededResponse:(SKPaymentTransaction *)transaction
 {
-	return @{ kIdentifierKey: transaction.payment.productIdentifier };
+    NSData *data = [NSData dataWithContentsOfURL:[NSBUNDLE appStoreReceiptURL]];
+    
+	return @{
+        kIdentifierKey: transaction.payment.productIdentifier,
+        kReceiptKey: [data base64EncodedStringWithOptions:0]
+    };
 }
 
 +(NSDictionary *)buildPurchaseRestoredResponse:(SKPaymentTransaction *)transaction

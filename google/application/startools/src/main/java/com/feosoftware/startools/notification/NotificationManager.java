@@ -30,8 +30,9 @@ public class NotificationManager extends BroadcastReceiver
 {
     private static Set<String> channels = new HashSet<>();
 
-    public static void CreateChannel(String identifier,
-                                     String name, String description,
+    public static void createChannel(String identifier,
+                                     String name,
+                                     String description,
                                      int importance,
                                      String soundName,
                                      int enableLights,
@@ -81,11 +82,13 @@ public class NotificationManager extends BroadcastReceiver
                                               boolean enableLights,
                                               boolean enableVibration,
                                               String bundle) {
-        if (channels.contains(identifier))
+        if (channels.contains(identifier)) {
             return;
+        }
+
         channels.add(identifier);
 
-        CreateChannel(identifier,
+        createChannel(identifier,
                 name,
                 identifier + " notifications",
                 android.app.NotificationManager.IMPORTANCE_DEFAULT,
@@ -97,15 +100,15 @@ public class NotificationManager extends BroadcastReceiver
                 bundle);
     }
 
-    public static void SetNotification(int id,
+    public static void setNotification(int id,
                                        long delayMs,
                                        String title,
                                        String message,
                                        String ticker,
-                                       int sound,
+                                       boolean enableSound,
                                        String soundName,
-                                       int vibrate,
-                                       int lights,
+                                       boolean enableVibration,
+                                       boolean enableLights,
                                        String largeIconResource,
                                        String smallIconResource,
                                        int bgColor,
@@ -114,14 +117,11 @@ public class NotificationManager extends BroadcastReceiver
                                        ArrayList<NotificationAction> actions)
     {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (channel == null)
+            if (channel == null) {
                 channel = "default";
-            createChannelIfNeeded(channel,
-                    title,
-                    soundName,
-                    lights == 1,
-                    vibrate == 1,
-                    bundle);
+            }
+
+            createChannelIfNeeded(channel, title, soundName, enableLights, enableVibration, bundle);
         }
 
         Activity activity = UnityPlayer.currentActivity;
@@ -132,10 +132,10 @@ public class NotificationManager extends BroadcastReceiver
         intent.putExtra("message", message);
         intent.putExtra("id", id);
         intent.putExtra("color", bgColor);
-        intent.putExtra("sound", sound == 1);
+        intent.putExtra("sound", enableSound);
         intent.putExtra("soundName", soundName);
-        intent.putExtra("vibrate", vibrate == 1);
-        intent.putExtra("lights", lights == 1);
+        intent.putExtra("vibrate", enableVibration);
+        intent.putExtra("lights", enableLights);
         intent.putExtra("l_icon", largeIconResource);
         intent.putExtra("s_icon", smallIconResource);
         intent.putExtra("bundle", bundle);
@@ -158,16 +158,16 @@ public class NotificationManager extends BroadcastReceiver
         }
     }
 
-    public static void SetRepeatingNotification(int id,
+    public static void setRepeatingNotification(int id,
                                                 long delayMs,
                                                 String title,
                                                 String message,
                                                 String ticker,
                                                 long rep,
-                                                int sound,
+                                                boolean enableSound,
                                                 String soundName,
-                                                int vibrate,
-                                                int lights,
+                                                boolean enableVibration,
+                                                boolean enableLights,
                                                 String largeIconResource,
                                                 String smallIconResource,
                                                 int bgColor,
@@ -176,39 +176,40 @@ public class NotificationManager extends BroadcastReceiver
                                                 ArrayList<NotificationAction> actions)
     {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (channel == null)
+            if (channel == null) {
                 channel = "default";
-            createChannelIfNeeded(channel,
-                    title,
-                    soundName,
-                    lights == 1,
-                    vibrate == 1,
-                    bundle);
+            }
+
+            createChannelIfNeeded(channel, title, soundName, enableLights, enableVibration, bundle);
         }
 
         Activity currentActivity = UnityPlayer.currentActivity;
-        AlarmManager am = (AlarmManager)currentActivity.getSystemService(Context.ALARM_SERVICE);
+
         Intent intent = new Intent(currentActivity, NotificationManager.class);
         intent.putExtra("ticker", ticker);
         intent.putExtra("title", title);
         intent.putExtra("message", message);
         intent.putExtra("id", id);
         intent.putExtra("color", bgColor);
-        intent.putExtra("sound", sound == 1);
+        intent.putExtra("sound", enableSound);
         intent.putExtra("soundName", soundName);
-        intent.putExtra("vibrate", vibrate == 1);
-        intent.putExtra("lights", lights == 1);
+        intent.putExtra("vibrate", enableVibration);
+        intent.putExtra("lights", enableLights);
         intent.putExtra("l_icon", largeIconResource);
         intent.putExtra("s_icon", smallIconResource);
         intent.putExtra("bundle", bundle);
         intent.putExtra("channel", channel);
+
         Bundle b = new Bundle();
         b.putParcelableArrayList("actions", actions);
+
         intent.putExtra("actionsBundle", b);
-        am.setRepeating(AlarmManager.RTC_WAKEUP,
-                System.currentTimeMillis() + delayMs,
-                rep,
-                PendingIntent.getBroadcast(currentActivity, id, intent, PendingIntent.FLAG_UPDATE_CURRENT));
+
+        long triggerAtMills = System.currentTimeMillis() + delayMs;
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(currentActivity, id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        AlarmManager am = (AlarmManager)currentActivity.getSystemService(Context.ALARM_SERVICE);
+        am.setRepeating(AlarmManager.RTC_WAKEUP, triggerAtMills, rep, pendingIntent);
     }
 
     public void onReceive(Context context, Intent intent)
@@ -244,8 +245,9 @@ public class NotificationManager extends BroadcastReceiver
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0,
                 notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        if (channel == null)
+        if (channel == null) {
             channel = "default";
+        }
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, channel);
 
@@ -254,40 +256,48 @@ public class NotificationManager extends BroadcastReceiver
                 .setContentTitle(title)
                 .setContentText(message);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             builder.setColor(color);
+        }
 
-        if (ticker != null && ticker.length() > 0)
+        if (ticker != null && ticker.length() > 0) {
             builder.setTicker(ticker);
+        }
 
-        if (s_icon != null && s_icon.length() > 0)
+        if (s_icon != null && s_icon.length() > 0) {
             builder.setSmallIcon(res.getIdentifier(s_icon, "drawable", context.getPackageName()));
+        }
 
-        if (l_icon != null && l_icon.length() > 0)
+        if (l_icon != null && l_icon.length() > 0) {
             builder.setLargeIcon(BitmapFactory.decodeResource(res, res.getIdentifier(l_icon, "drawable", context.getPackageName())));
+        }
 
         if (sound) {
             if (soundName != null) {
                 int identifier = res.getIdentifier("raw/" + soundName, null, context.getPackageName());
                 builder.setSound(Uri.parse("android.resource://" + bundle + "/" + identifier));
-            } else
+            } else {
                 builder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+            }
         }
 
-        if (vibrate)
-            builder.setVibrate(new long[] {
+        if (vibrate) {
+            builder.setVibrate(new long[]{
                     1000L, 1000L
             });
+        }
 
-        if (lights)
+        if (lights) {
             builder.setLights(Color.GREEN, 3000, 3000);
+        }
 
         if (actions != null) {
             for (int i = 0; i < actions.size(); i++) {
                 NotificationAction action = actions.get(i);
                 int icon = 0;
-                if (action.getIcon() != null && action.getIcon().length() > 0)
+                if (action.getIcon() != null && action.getIcon().length() > 0) {
                     icon = res.getIdentifier(action.getIcon(), "drawable", context.getPackageName());
+                }
                 builder.addAction(icon, action.getTitle(), buildActionIntent(action, i, context));
             }
         }
@@ -296,26 +306,29 @@ public class NotificationManager extends BroadcastReceiver
         notificationManager.notify(id, notification);
     }
 
-    private static PendingIntent buildActionIntent(NotificationAction action, int id,Context context) {
+    private static PendingIntent buildActionIntent(NotificationAction action, int id, Context context) {
         Intent intent = new Intent(context, NotificationActionHandler.class);
+
         intent.putExtra("id", id);
         intent.putExtra("gameObject", action.getGameObject());
         intent.putExtra("handlerMethod", action.getHandlerMethod());
         intent.putExtra("actionId", action.getIdentifier());
         intent.putExtra("foreground", action.isForeground());
+
         return PendingIntent.getBroadcast(context, id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
-    public static void CancelPendingNotification(int id)
+    public static void cancelPendingNotification(int id)
     {
         Activity currentActivity = UnityPlayer.currentActivity;
-        AlarmManager am = (AlarmManager)currentActivity.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(currentActivity, NotificationManager.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(currentActivity, id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        AlarmManager am = (AlarmManager)currentActivity.getSystemService(Context.ALARM_SERVICE);
         am.cancel(pendingIntent);
     }
 
-    public static void ClearShowingNotifications()
+    public static void clearShowingNotifications()
     {
         Activity currentActivity = UnityPlayer.currentActivity;
         android.app.NotificationManager nm = (android.app.NotificationManager)currentActivity.getSystemService(Context.NOTIFICATION_SERVICE);
