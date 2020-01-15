@@ -186,7 +186,7 @@ NSString * const StarToolsErrorDomain = @"com.feosoftware.startools";
 	
 	[SKPAYMENTQUEUE finishTransaction:transaction];
 	
-	FEEDBACK_RESPOND(kFeedbackKey_PurchaseSucceeded, [FeedbackResponder buildPurchaseSucceededResponse:transaction])
+	FEEDBACK_RESPOND(kFeedbackKey_PurchaseSucceeded, [FeedbackResponder buildPurchaseSucceededResponse:transaction product:_products[transaction.payment.productIdentifier]])
 }
 
 -(void)onPaymentTransactionRestored:(SKPaymentTransaction *)transaction

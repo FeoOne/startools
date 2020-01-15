@@ -4,5 +4,7 @@ namespace StarTools.Data
     {
         public string Identifier;
         public string Receipt;
+        public string CurrencyCode;
+        public float Price;
     }
 }

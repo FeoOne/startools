@@ -20,6 +20,8 @@ static const NSString * const kIdentifierKey = @"Identifier";
 static const NSString * const kProductsKey = @"Products";
 // purchase succeeded
 static const NSString * const kReceiptKey = @"Receipt";
+static const NSString * const kCurrencyCodeKey = @"CurrencyCode";
+static const NSString * const kPriceKey = @"Price";
 // purchase fail
 static const NSString * const kIsCancelledKey = @"IsCancelled";
 // network state
@@ -65,14 +67,16 @@ static const NSString * const kProductCurrencyCodeKey = @"CurrencyCode";
 	return @{ kCodeKey: @(error.code), kMessageKey: error.localizedDescription };
 }
 
-+(NSDictionary *)buildPurchaseSucceededResponse:(SKPaymentTransaction *)transaction
++(NSDictionary *)buildPurchaseSucceededResponse:(SKPaymentTransaction *)transaction product:(Product *)product
 {
     NSData *data = [NSData dataWithContentsOfURL:[NSBUNDLE appStoreReceiptURL]];
     
 	return @{
         kIdentifierKey: transaction.payment.productIdentifier,
-        kReceiptKey: [data base64EncodedStringWithOptions:0]
-    };
+        kReceiptKey: [data base64EncodedStringWithOptions:0],
+        kCurrencyCodeKey: [product.storeKitProduct.priceLocale objectForKey:NSLocaleCurrencyCode],
+        kPriceKey: @([product.storeKitProduct.price floatValue])
+    };[product.storeKitProduct.price floatValue]
 }
 
 +(NSDictionary *)buildPurchaseRestoredResponse:(SKPaymentTransaction *)transaction
