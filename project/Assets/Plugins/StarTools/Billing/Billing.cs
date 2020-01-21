@@ -34,6 +34,9 @@ namespace StarTools.Billing
         public readonly Stream<PurchaseSucceeded> PurchaseSucceededStream = new Stream<PurchaseSucceeded>();
         public readonly Stream<PurchaseRestored> PurchaseRestoredStream = new Stream<PurchaseRestored>();
         public readonly Stream<PurchaseFailed> PurchaseFailedStream = new Stream<PurchaseFailed>();
+#if UNITY_ANDROID
+        public readonly Stream<PurchasePending> PurchasePendingStream = new Stream<PurchasePending>();
+#endif
         
         private IDisposable _launchSucceededHandle;
         private IDisposable _launchFailedHandle;
@@ -94,6 +97,10 @@ namespace StarTools.Billing
                 x => PurchaseRestoredStream.Send(x));
             FeedbackHelper.RegisterFeedback<PurchaseFailed>((int)FeedbackHelper.Key.PurchaseFailed, 
                 x => PurchaseFailedStream.Send(x));
+#if UNITY_ANDROID
+            FeedbackHelper.RegisterFeedback<PurchasePending>((int)FeedbackHelper.Key.PurchasePending, 
+                x => PurchasePendingStream.Send(x));
+#endif
         }
 
         private void ListenLaunchResult()

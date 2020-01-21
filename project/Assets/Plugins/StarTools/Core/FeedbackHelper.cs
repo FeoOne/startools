@@ -21,6 +21,9 @@ namespace StarTools.Core
             PurchaseRestored = 3,
             PurchaseFailed = 4,
             NetworkStateChanged = 5,
+#if UNITY_ANDROID
+            PurchasePending = 6,
+#endif
         }
             
 #if UNITY_IOS && (STARTOOLS_DEBUG || !UNITY_EDITOR) // apple

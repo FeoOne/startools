@@ -44,6 +44,11 @@ namespace StarTools.Billing.Platform.Google
         {
             return true;
         }
+
+        public void ConsumePendingPurchase(string token)
+        {
+            _object?.Call("consumePendingPurchase", token);
+        }
     }
 #endif
 }

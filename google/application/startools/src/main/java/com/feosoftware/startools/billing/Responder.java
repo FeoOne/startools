@@ -4,6 +4,7 @@ import android.support.annotation.Nullable;
 
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.Purchase;
 import com.feosoftware.startools.core.Journal;
 
 import org.json.JSONArray;
@@ -19,6 +20,11 @@ final class Responder {
     private static final String CODE_KEY = "Code";
     private static final String MESSAGE_KEY = "Message";
     private static final String IDENTIFIER_KEY = "Identifier";
+
+    // purchase
+    private static final String TOKEN_KEY = "Token";
+    private static final String RECEIPT_KEY = "Receipt";
+    private static final String SIGNATURE_KEY = "Signature";
 
     // product
     private static final String LOCALIZED_DESCRIPTION_KEY = "LocalizedDescription";
@@ -52,7 +58,7 @@ final class Responder {
                     obj.put(LOCALIZED_TITLE_KEY, product.getDetails().getTitle());
                     obj.put(LOCALIZED_PRICE_KEY, product.getDetails().getOriginalPrice());
                     obj.put(CURRENCY_CODE_KEY, product.getDetails().getPriceCurrencyCode());
-                    obj.put(PRICE_KEY, (float) product.getDetails().getOriginalPriceAmountMicros() / 1000000.0f);
+                    obj.put(PRICE_KEY, (float)product.getDetails().getOriginalPriceAmountMicros() / 1000000.0f);
 
                     array.put(obj);
                 }
@@ -80,6 +86,25 @@ final class Responder {
         }
         catch (JSONException e) {
             Journal.e(CATEGORY, "Can't buildLaunchFailedResponse: " + e.getMessage());
+        }
+
+        return response;
+    }
+
+    static JSONObject buildPurchasePendingResponse(Purchase purchase, Product product) {
+        JSONObject response = null;
+
+        try {
+            response = new JSONObject();
+
+            response.put(TOKEN_KEY, purchase.getPurchaseToken());
+            response.put(RECEIPT_KEY, purchase.getOriginalJson());
+            response.put(SIGNATURE_KEY, purchase.getSignature());
+            response.put(CURRENCY_CODE_KEY, product.getDetails().getPriceCurrencyCode());
+            response.put(PRICE_KEY, (float)product.getDetails().getOriginalPriceAmountMicros() / 1000000.0f);
+        }
+        catch (JSONException e) {
+            Journal.e(CATEGORY, "Can't buildPurchasePendingResponse: " + e.getMessage());
         }
 
         return response;

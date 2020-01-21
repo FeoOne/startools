@@ -167,6 +167,24 @@ public final class Billing implements
         _billingClient.queryPurchaseHistoryAsync(BillingClient.SkuType.INAPP, this);
     }
 
+    public void consumePendingPurchase(String token) {
+        synchronized (this) {
+            _consumePendingPurchase(token);
+        }
+    }
+
+    private void _consumePendingPurchase(String token) {
+        String sku = _pendingProducts.get(token);
+        if (sku != null) {
+            Journal.i(CATEGORY, "Consuming purchase " + sku);
+
+            ConsumeParams params = ConsumeParams.newBuilder()
+                    .setPurchaseToken(token)
+                    .build();
+            _billingClient.consumeAsync(params, this);
+        }
+    }
+
     /**
      * Private
      */
@@ -256,14 +274,15 @@ public final class Billing implements
     }
 
     private void consumePurchase(Purchase purchase) {
-        Journal.i(CATEGORY, "Consuming purchase " + purchase.getSku());
+        Journal.i(CATEGORY, "Pending purchase " + purchase.getSku());
 
-        _pendingProducts.put(purchase.getPurchaseToken(), purchase.getSku());
+        Product product = _products.get(purchase.getSku());
+        if (product != null) {
+            FeedbackHelper.sendFeedback(FeedbackHelper.PURCHASE_PENDING_KEY,
+                    Responder.buildPurchasePendingResponse(purchase, product));
 
-        ConsumeParams params = ConsumeParams.newBuilder()
-                .setPurchaseToken(purchase.getPurchaseToken())
-                .build();
-        _billingClient.consumeAsync(params, this);
+            _pendingProducts.put(purchase.getPurchaseToken(), purchase.getSku());
+        }
     }
 
     private void acknowledgePurchase(Purchase purchase) {
@@ -281,15 +300,15 @@ public final class Billing implements
         Purchase.PurchasesResult queryPurchasesResult = _billingClient.queryPurchases(BillingClient.SkuType.INAPP);
         Journal.i(CATEGORY, "Querying purchases result: " + queryPurchasesResult.getResponseCode());
 
-        List<Purchase> purchases = queryPurchasesResult.getPurchasesList();
-        if (purchases != null) {
-            for (Purchase purchase: purchases) {
-                if (!_purchasedTokens.contains(purchase.getPurchaseToken()) &&
-                    !_pendingProducts.containsKey(purchase.getPurchaseToken())) {
-                    handlePurchase(purchase);
-                }
-            }
-        }
+//        List<Purchase> purchases = queryPurchasesResult.getPurchasesList();
+//        if (purchases != null) {
+//            for (Purchase purchase: purchases) {
+//                if (!_purchasedTokens.contains(purchase.getPurchaseToken()) &&
+//                    !_pendingProducts.containsKey(purchase.getPurchaseToken())) {
+//                    handlePurchase(purchase);
+//                }
+//            }
+//        }
 
         // todo: SkuType.SUBS
     }
@@ -399,7 +418,7 @@ public final class Billing implements
             onPurchaseFailed(billingResult);
 
             if (identifier != null) {
-                _pendingProducts.remove(identifier);
+                _pendingProducts.remove(purchaseToken);
             }
 
             return;
@@ -416,7 +435,7 @@ public final class Billing implements
             return;
         }
 
-        _pendingProducts.remove(identifier);
+        _pendingProducts.remove(purchaseToken);
         _purchasedTokens.add(purchaseToken);
 
         onPurchaseSucceeded(identifier);

@@ -12,6 +12,7 @@ public class FeedbackHelper {
     public static final int PURCHASE_RESTORED_KEY = 3;
     public static final int PURCHASE_FAILED_KEY = 4;
     public static final int NETWORK_STATE_CHANGED_KEY = 5;
+    public static final int PURCHASE_PENDING_KEY = 6;
 
     private static final SparseArray<Feedback> _feedbacks = new SparseArray<>(16);
 
