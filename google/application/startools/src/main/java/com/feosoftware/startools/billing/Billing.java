@@ -138,6 +138,10 @@ public final class Billing implements
     private void _purchase(String identifier) {
         if (_state != LAUNCHED_LAUNCH_STATE) {
             Journal.e(CATEGORY, "Billing not launched.");
+
+            FeedbackHelper.sendFeedback(FeedbackHelper.LAUNCH_FAILED_KEY,
+                    Responder.buildLaunchFailedResponse(BillingResult.newBuilder().setResponseCode(BillingClient.BillingResponseCode.BILLING_UNAVAILABLE).build()));
+
             return;
         }
 
