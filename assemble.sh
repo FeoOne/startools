@@ -28,9 +28,9 @@ cd "${DIR}/google/application/" || exit
 
 DST="${DIR}/project/Assets/Plugins/StarTools/Platform/Android/Plugin"
 rm -Rf ${DST}/*
-mv ./startools/build/outputs/aar/startools-release.aar ${DST}/com.samberdino.startools.aar
+mv ./startools/build/outputs/aar/startools-release.aar ${DST}/com.yourcompanyname.startools.aar
 
 # Unity
 
 rm -f "${DIR}/*.unitypackage"
-${UNITY} -projectPath "${DIR}/project/" -quit -batchmode -exportPackage Assets/Plugins/StarTools "${DIR}/com.samberdino.startools.unitypackage"
+${UNITY} -projectPath "${DIR}/project/" -quit -batchmode -exportPackage Assets/Plugins/StarTools "${DIR}/com.yourcompanyname.startools.unitypackage"

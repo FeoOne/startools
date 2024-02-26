@@ -73,7 +73,7 @@ namespace Core
                 Debug.Log($"Code: {x.Code}");
             });
             
-            Billing.Instance.RegisterProduct("com.samberdino.gameoflords.a_few_coins", BillingFacade.ProductType.Consumable);
+            Billing.Instance.RegisterProduct("com.yourcompanyname.yourappname.a_few_coins", BillingFacade.ProductType.Consumable);
             
             LockInterface();
             
@@ -93,7 +93,7 @@ namespace Core
             
             LockInterface();
             
-            Billing.Instance.Purchase("com.samberdino.gameoflords.a_few_coins");
+            Billing.Instance.Purchase("com.yourcompanyname.yourappname.a_few_coins");
         }
         
         public void OnRestore()

@@ -8,3 +8,7 @@ The need to develop this plugin was that the standard one did not correctly hand
 
 The build process has only been tested on macOS.
 For the entry point, see the assemble.sh script.
+
+# Bundle ID
+
+Use the search in the project folder using the keywords `yourcompanyname` and `yourappname` to set your own identifiers.
